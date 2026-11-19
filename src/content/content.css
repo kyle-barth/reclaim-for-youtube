@@ -18,7 +18,10 @@ html[data-rfy] [data-rfy-hide] {
 /* Core 1 – "Experiencing interruptions?" toast (its action links to the ad-blocker help) */
 
 html[data-rfy][data-rfy-hide-interruptions] tp-yt-paper-toast:has(a[href*="blocker" i]),
-html[data-rfy][data-rfy-hide-interruptions] yt-notification-action-renderer:has(a[href*="blocker" i]) {
+html[data-rfy][data-rfy-hide-interruptions] yt-notification-action-renderer:has(a[href*="blocker" i]),
+/* Current form: a snackbar marked by interruptions.js. Hide its whole container while it is
+   present, so no empty (but click-blocking) box is left behind. */
+html[data-rfy][data-rfy-hide-interruptions] snackbar-container:has([data-rfy-hide~="interruptions"]) {
   display: none !important;
 }
 

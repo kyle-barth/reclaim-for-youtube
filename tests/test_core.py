@@ -84,6 +84,60 @@ def test_reused_toast_shows_other_messages(browser):
     browser.wait_for(lambda: browser.all_visible("tp-yt-paper-toast#toast"), message="other toast visible")
 
 
+SNACKBAR = """<snackbar-view-model class="snackbarViewModelHost snackbarViewModelSwipeable" data-test="snackbar" style="display:block; min-height:48px; background:#222; color:#fff;">
+<div class="snackbarViewModelEngagementBarWrapper"><div class="snackbarViewModelTitleSubtextWrapper"><div class="snackbarViewModelTitle">
+<span class="ytAttributedStringHost ytAttributedStringWhiteSpacePreWrap" role="text">{text}</span></div></div></div></snackbar-view-model>"""
+
+SHOW_SNACKBAR = """
+  const [markup] = arguments;
+  const wrap = document.querySelector('snackbar-container > div');
+  wrap.classList.add('ytSnackbarContainerSnackbarContainerOpened');
+  const t = document.createElement('template');
+  t.innerHTML = markup.trim();
+  const el = t.content.firstElementChild;
+  wrap.replaceChildren(el);
+  // Record visibility in the first frame after insertion: hidden before paint means no flash.
+  window.__firstFrameVisible = null;
+  requestAnimationFrame(() => { window.__firstFrameVisible = el.checkVisibility(); });
+"""
+
+
+def test_interruptions_snackbar_hidden_before_first_paint(browser):
+    """Current visible form (captured from an affected account): a snackbar-view-model."""
+    browser.open("/")
+    browser.js(SHOW_SNACKBAR, SNACKBAR.format(text="Experiencing interruptions?"))
+    browser.wait_for(lambda: browser.js("return window.__firstFrameVisible") is not None, message="frame probe")
+    assert browser.js("return window.__firstFrameVisible") is False, "snackbar must never paint"
+    assert browser.visible('[data-test="snackbar-container"]') == [False], "container hidden too"
+    under = browser.js(
+        "const r = document.querySelector('[data-test=\"under-snackbar\"]').getBoundingClientRect();"
+        "return document.elementFromPoint(r.left + 10, r.top + 10).dataset.test;"
+    )
+    assert under == "under-snackbar", "nothing invisible left over the page"
+
+
+def test_interruptions_snackbar_with_no_break_space(browser):
+    browser.open("/")
+    browser.js(SHOW_SNACKBAR, SNACKBAR.format(text="Experiencing interruptions?"))
+    browser.wait_for(lambda: browser.visible('[data-test="snackbar"]') == [False], message="hidden with nbsp")
+
+
+def test_other_snackbars_still_show(browser):
+    browser.open("/")
+    browser.js(SHOW_SNACKBAR, SNACKBAR.format(text="Saved to Watch later"))
+    time.sleep(0.5)
+    assert browser.visible('[data-test="snackbar"]') == [True]
+    assert browser.visible('[data-test="snackbar-container"]') == [True]
+
+
+def test_interruptions_snackbar_toggle_off(browser):
+    browser.set_settings(hideInterruptions=False)
+    browser.open("/")
+    browser.js(SHOW_SNACKBAR, SNACKBAR.format(text="Experiencing interruptions?"))
+    time.sleep(0.6)
+    assert browser.visible('[data-test="snackbar"]') == [True]
+
+
 def test_interruptions_ephemeral_host_hidden_then_reused(browser):
     """Current form (captured live 2026-11): a reused yt-ephemeral-actions host with only text."""
     browser.open("/")

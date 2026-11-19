@@ -34,3 +34,6 @@
 - The "Experiencing interruptions?" popup now renders in the reused host `ytd-app > yt-ephemeral-actions.ytEphemeralActionsHost`
   (`aria-live="polite" aria-atomic="true"`) containing only the text "Experiencing interruptions?", no link. Hidden by text
   match while that message is showing; the host is reused for other notices, which stay visible.
+- Correction, same day: `yt-ephemeral-actions` is only the screen-reader copy. The **visible** popup is a snackbar:
+  `ytd-app > snackbar-container > div.ytSnackbarContainerSnackbarContainer(.ytSnackbarContainerOpened) > snackbar-view-model > … >
+  span.ytAttributedStringHost[role=text]` "Experiencing interruptions?". The snackbar host is reused for other messages.
