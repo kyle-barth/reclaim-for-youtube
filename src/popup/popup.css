@@ -1,0 +1,515 @@
+/* Reclaim for YouTube: toolbar popup
+   Colours follow Firefox's Acorn tokens so the popup sits naturally inside a Firefox panel.
+   Every text/background pair is AA (4.5:1+); every control boundary and state indicator is 3:1+.
+   Ratios below are against the panel background unless stated; full table in design-spec.md section 8.
+   Off state: the settings binder sets <html data-paused>. */
+
+:root {
+  color-scheme: light dark;
+
+  /* Light: Firefox panel (#fff) */
+  --bg: #ffffff;
+  --bg-raised: #f9f9fb;          /* footer */
+  --bg-off: #f0f0f4;             /* masthead while paused */
+  --text: #15141a;               /* 18.3:1 */
+  --text-muted: #5b5b66;         /* 6.7:1; 5.9:1 on --bg-off */
+  --divider: #e0e0e6;            /* decorative only */
+  --card-border: #cfcfd8;        /* decorative only; the radio itself carries state */
+  --border-interactive: #7c7c88; /* 4.1:1; 3.6:1 on --bg-off */
+  --accent: #0061e0;             /* 5.6:1 */
+  --accent-hover: #0250bb;
+  --accent-active: #053e94;
+  --on-accent: #ffffff;          /* 5.6:1 on --accent */
+  --accent-tint: rgb(0 97 224 / 0.07);
+  --hover: rgb(21 20 26 / 0.05);
+  --button-bg: #f0f0f4;
+  --button-hover: #e0e0e6;
+  --button-active: #cfcfd8;
+  --paused: #8f8f9d;             /* "on but paused" fill: 3.2:1, and lighter than --accent on purpose */
+  --paused-hover: #7c7c88;
+  --on-paused: #ffffff;          /* thumb on --paused: 3.2:1 */
+  --focus: #0061e0;
+  --brand: #12877a;              /* masthead icon */
+  --brand-flap: #a8e6da;
+  --brand-off: #84838f;
+  --brand-off-flap: #e4e4ea;
+
+  --radius-s: 4px;
+  --radius-m: 6px;
+  --gutter: 16px;
+  --control-h: 32px;             /* Acorn button/field height */
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+  /* Four sizes only */
+  --fs-title: 15px;
+  --fs-label: 14px;              /* labels and section headings */
+  --fs-control: 13px;            /* buttons, selects, On/Off */
+  --fs-help: 12.5px;             /* help, notes, version */
+  --lh-help: 1.4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark: Firefox dark-theme panel (#42414d) */
+    --bg: #42414d;
+    --bg-raised: #3a3944;
+    --bg-off: #2b2a33;
+    --text: #fbfbfe;               /* 9.7:1 */
+    --text-muted: #cfcfd8;         /* 6.5:1; 9.2:1 on --bg-off */
+    --divider: rgb(251 251 254 / 0.12);
+    --card-border: rgb(251 251 254 / 0.22);
+    --border-interactive: #a5a5b1; /* 4.1:1; 5.8:1 on --bg-off */
+    --accent: #00ddff;             /* 6.1:1 */
+    --accent-hover: #80ebff;
+    --accent-active: #aaf2ff;
+    --on-accent: #15141a;          /* 11.2:1 on --accent */
+    --accent-tint: rgb(0 221 255 / 0.10);
+    --hover: rgb(251 251 254 / 0.06);
+    --button-bg: #52525e;
+    --button-hover: #5b5b66;
+    --button-active: #6f6e7a;
+    --paused: #a5a5b1;             /* 4.1:1, dimmer than the cyan accent (6.1:1) */
+    --paused-hover: #bfbfc9;
+    --on-paused: #42414d;          /* 4.1:1 on --paused */
+    --focus: #00ddff;
+    --brand: #24a896;              /* lighter teal so the masthead icon isn't dim: 3.4:1 on --bg */
+  }
+}
+
+/* ---------- Base ---------- */
+
+* { box-sizing: border-box; }
+
+html {
+  scrollbar-gutter: stable;      /* a classic scrollbar must not eat the right gutter */
+  scroll-padding-block-end: 24px;    /* the last focus stops aren't cut off at the bottom edge */
+  scroll-padding-block-start: 100px; /* focused rows never scroll under the sticky masthead (WCAG 2.4.11) */
+}
+html, body { margin: 0; }
+
+body {
+  inline-size: 380px;            /* Firefox sizes the popup to this; height grows to 600px, then scrolls */
+  font-family: var(--font);
+  font-size: var(--fs-help);
+  line-height: var(--lh-help);
+  color: var(--text);
+  background: var(--bg);
+}
+
+h1, h2, p { margin: 0; }
+
+[hidden] { display: none !important; }
+
+.visually-hidden {
+  position: absolute !important;
+  inline-size: 1px; block-size: 1px;
+  overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* State switching. Hidden spans also leave the accessible name/description. */
+html:not([data-paused]) .when-paused,
+html[data-paused] .when-on { display: none; }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Masthead + master switch ---------- */
+
+.masthead {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  padding: 12px var(--gutter) 11px;
+  background: var(--bg);
+  border-block-end: 1px solid var(--divider);
+}
+
+.masthead-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon { flex: none; display: block; }
+.brand-disc { fill: var(--brand); }
+.brand-flap { fill: var(--brand-flap); stroke: var(--brand); }
+
+h1 {
+  flex: 1;
+  font-size: var(--fs-title);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.master {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.master-state {
+  min-inline-size: 3ch;
+  text-align: end;
+  font-size: var(--fs-control);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.master-help {
+  margin-block-start: 3px;
+  margin-inline-start: 30px;     /* aligns with the product name, past the icon */
+  min-block-size: calc(2em * var(--lh-help)); /* both states take two lines: no layout shift */
+  font-size: var(--fs-help);
+  color: var(--text-muted);
+}
+
+/* Paused: the masthead changes background, icon and wording. "Off" stays full-strength. */
+html[data-paused] .masthead { background: var(--bg-off); }
+html[data-paused] .brand-disc { fill: var(--brand-off); }
+html[data-paused] .brand-flap { fill: var(--brand-off-flap); stroke: var(--brand-off); }
+html[data-paused] .master-help { color: var(--text); }
+
+/* ---------- Sections ---------- */
+
+main { padding: 0 var(--gutter); }
+
+/* Sections are split by full-width rules; rows inside a section are grouped by spacing alone. */
+section { padding-block: 16px 8px; }
+section + section {
+  margin-inline: calc(-1 * var(--gutter));
+  padding-inline: var(--gutter);
+  border-block-start: 1px solid var(--divider);
+}
+
+/* Headings outrank labels: same size, heavier weight, plus the rule and space above. */
+h2 {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  padding-block-end: 2px;
+}
+
+/* ---------- Setting row: label + control on one line, help below ---------- */
+
+.setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding-block: 8px;
+}
+
+.setting-label {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  font-size: var(--fs-label);
+  line-height: 1.3;
+  text-wrap: balance;            /* a label that must wrap splits evenly, no one-word orphan */
+}
+label.setting-label { cursor: pointer; }
+
+.setting > .switch,
+.setting > .select {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+}
+
+.setting-help {
+  grid-column: 1 / -1;           /* full width: fewer lines in a narrow popup */
+  grid-row: 2;
+  font-size: var(--fs-help);
+  color: var(--text-muted);
+}
+
+/* ---------- Switch (native checkbox, role="switch") ----------
+   Firefox does not draw ::before/::after on inputs, so the thumb is a radial-gradient. */
+
+.switch {
+  --thumb: var(--text-muted);
+  --thumb-size: 12px;
+  appearance: none;
+  flex: none;
+  margin: 1px 0 0;
+  inline-size: 32px;
+  block-size: 18px;
+  border: 1px solid var(--border-interactive);
+  border-radius: 9px;
+  background-color: transparent;
+  background-image: radial-gradient(circle closest-side, var(--thumb) calc(100% - 0.75px), transparent 100%);
+  background-size: var(--thumb-size) var(--thumb-size);
+  background-repeat: no-repeat;
+  background-position: 2px center;
+  cursor: pointer;
+  transition: background-position 120ms ease, background-color 120ms ease;
+}
+.switch:hover { background-color: var(--hover); }
+.switch:checked {
+  --thumb: var(--on-accent);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  background-position: calc(100% - 2px) center;
+}
+.switch:checked:hover { background-color: var(--accent-hover); border-color: var(--accent-hover); }
+.switch:checked:active { background-color: var(--accent-active); border-color: var(--accent-active); }
+.switch:disabled { opacity: 0.4; cursor: default; }  /* not used today; defined for completeness */
+
+.switch--master {
+  --thumb-size: 16px;
+  inline-size: 40px;
+  block-size: 22px;
+  border-radius: 11px;
+  margin: 0;
+}
+
+/* ---------- Shorts: radio cards (like Firefox's Tracking Protection choices) ---------- */
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+fieldset > legend {
+  float: inline-start;           /* a floated legend lays out like normal content */
+  inline-size: 100%;
+  padding: 0;
+}
+
+.setting--choices { display: block; }
+
+.choices {
+  clear: both;
+  display: grid;
+  gap: 6px;
+  padding-block-start: 6px;
+}
+
+.choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 1px;
+  padding: 7px 12px 8px 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-m);
+}
+.choice:hover { background: var(--hover); }
+.choice:has(input:checked) {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--accent-tint);
+}
+.choice:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.choice input {
+  grid-row: 1;
+  margin: 1px 0 0;
+  inline-size: 16px;
+  block-size: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.choice input:focus-visible { outline: none; }  /* the whole card carries the ring */
+
+.choice label {
+  grid-column: 2;
+  font-size: var(--fs-label);
+  line-height: 1.3;
+  cursor: pointer;
+}
+/* Stretch the label over the card so the help text is clickable too,
+   without putting the help inside the label (which would bloat the accessible name). */
+.choice label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.choice-help {
+  grid-column: 2;
+  font-size: var(--fs-help);
+  color: var(--text-muted);
+}
+
+/* ---------- Select ---------- */
+
+.select {
+  position: relative;
+  display: inline-grid;
+  color: var(--text);
+}
+.select::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 12px;
+  inset-block-start: 50%;
+  inline-size: 6px;
+  block-size: 6px;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+.select select {
+  appearance: none;
+  inline-size: 180px;            /* one width for every select keeps the right edge tidy */
+  min-block-size: var(--control-h);
+  margin: 0;
+  padding: 5px 30px 5px 10px;
+  font: inherit;
+  font-size: var(--fs-control);
+  color: inherit;
+  background-color: var(--button-bg);
+  border: 1px solid var(--border-interactive);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+.select select:hover { background-color: var(--button-hover); }
+.select select:active { background-color: var(--button-active); }
+
+/* ---------- Video player: one feature, two switches ----------
+   A group header (legend + its note), then two ordinary rows indented under it.
+   Switches keep the same right edge as every other control. */
+
+.setting-group { padding-block: 8px 0; }
+.group-help { clear: both; padding-block-start: 2px; }
+.setting--nested {
+  margin-inline-start: 6px;
+  padding-inline-start: 12px;
+  border-inline-start: 2px solid var(--divider);
+}
+.setting--nested:first-of-type { margin-block-start: 6px; }
+
+/* ---------- Footer ---------- */
+
+.footer {
+  padding: 12px var(--gutter) 14px;
+  background: var(--bg-raised);
+  border-block-start: 1px solid var(--divider);
+}
+
+.promise { color: var(--text-muted); }
+.promise strong { color: var(--text); font-weight: 600; }
+
+.footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-start: 10px;
+}
+
+.footer-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--control-h);
+}
+.version { color: var(--text-muted); }
+.status { color: var(--text); }
+
+.button {
+  min-block-size: var(--control-h);
+  padding: 5px 12px;
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--button-bg);
+  border: 1px solid var(--border-interactive);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+.button:hover { background: var(--button-hover); }
+.button:active { background: var(--button-active); }
+.button--primary {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.button--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.button--primary:active { background: var(--accent-active); border-color: var(--accent-active); }
+
+.confirm { margin-block-start: 10px; }
+.confirm p { font-size: var(--fs-control); }
+.confirm-buttons {
+  display: flex;
+  gap: 8px;
+  margin-block-start: 8px;
+}
+
+/* ---------- Paused (master switch off) ----------
+   Labels stay full-strength so the user can still find the setting to blame.
+   Only the controls change: accent fills turn a lighter grey. */
+
+html[data-paused] main .switch:checked {
+  --thumb: var(--on-paused);
+  background-color: var(--paused);
+  border-color: var(--paused);
+}
+html[data-paused] main .switch:checked:hover {
+  background-color: var(--paused-hover);
+  border-color: var(--paused-hover);
+}
+html[data-paused] main .choice input { accent-color: var(--paused); }
+html[data-paused] main .choice:has(input:checked) {
+  border-color: var(--paused);
+  box-shadow: inset 0 0 0 1px var(--paused);
+  background: transparent;
+}
+
+/* ---------- Motion and forced colours ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .switch { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .switch {
+    forced-color-adjust: none;
+    --thumb: CanvasText;
+    background-color: Canvas;
+    border-color: CanvasText;
+  }
+  .switch:checked {
+    --thumb: HighlightText;
+    background-color: Highlight;
+    border-color: Highlight;
+  }
+  html[data-paused] main .switch:checked {
+    --thumb: Canvas;
+    background-color: GrayText;
+    border-color: GrayText;
+  }
+  /* box-shadow is dropped in forced colours, so the selected card gets a real 2px border instead */
+  .choice:has(input:checked),
+  html[data-paused] main .choice:has(input:checked) {
+    border-width: 2px;
+    padding: 6px 11px 7px 9px;
+  }
+  .choice:has(input:checked) { border-color: Highlight; }
+  html[data-paused] main .choice:has(input:checked) { border-color: GrayText; }
+  .select select { background-color: Canvas; color: CanvasText; border-color: CanvasText; }
+  .select::after { border-color: CanvasText; }
+  .setting--nested { border-inline-start-color: CanvasText; }
+}
+
+/* Hide the page until stored settings are rendered (avoids one frame of defaults on open).
+   Fail-safe: if the script never runs, the page reveals itself after 400ms anyway. */
+html:not([data-ready]) body {
+  visibility: hidden;
+  animation: rfy-reveal 0s linear 400ms forwards;
+}
+@keyframes rfy-reveal { to { visibility: visible; } }

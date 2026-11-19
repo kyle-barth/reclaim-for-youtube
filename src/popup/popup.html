@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>Reclaim for YouTube</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body data-popup>
+<!--
+  State hook: the settings binder sets <html data-paused> while `enabled` is off.
+  Everything that changes with that state (the On/Off word, the masthead copy, the icon, paused styling,
+  the screen-reader "paused" note) is driven from that attribute in CSS, so no per-state JS is needed.
+  .when-on / .when-paused spans are shown or hidden accordingly; hidden spans also drop out of the
+  accessible name and description computation, so aria-describedby can stay static.
+-->
+
+<!-- Masthead with the master switch. Sticky, and the same height in both states. -->
+<header class="masthead">
+  <div class="masthead-row">
+    <svg class="brand-icon" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true" focusable="false">
+      <defs><clipPath id="brand-clip"><circle cx="16" cy="16" r="14.5"/></clipPath></defs>
+      <path class="brand-disc" d="M11.04 2.37A14.5 14.5 0 1 0 29.63 20.96Z"/>
+      <path class="brand-flap" d="M11.04 2.37A14.5 14.5 0 0 0 29.63 20.96Z" stroke-width="2" stroke-linejoin="round" clip-path="url(#brand-clip)"/>
+    </svg>
+    <h1 id="product-name">Reclaim for YouTube</h1>
+    <div class="master">
+      <label for="enabled" class="master-state"><span class="when-on">On</span><span class="when-paused">Off</span></label>
+      <input type="checkbox" role="switch" class="switch switch--master" id="enabled"
+             data-setting="enabled" checked
+             aria-labelledby="product-name" aria-describedby="master-help">
+    </div>
+  </div>
+  <p class="master-help" id="master-help"><span class="when-on">Something missing on YouTube? Turn this off to check. No reload needed.</span><span class="when-paused">YouTube is back to normal, except Autoplay and audio on a video that’s already playing.</span></p>
+</header>
+
+<main>
+  <!-- Screen-reader note added to every setting's description while paused. The outer span is never hidden,
+       so its inner text counts only when it is displayed (i.e. while paused). -->
+  <span id="paused-note" class="visually-hidden"><span class="when-paused">Paused while Reclaim is off.</span></span>
+
+  <!-- ESSENTIALS: the three reasons the add-on exists -->
+  <section aria-labelledby="h-essentials">
+    <h2 id="h-essentials">Essentials</h2>
+
+    <div class="setting">
+      <label class="setting-label" for="hideInterruptions">Hide the “Experiencing&nbsp;interruptions?” pop-up</label>
+      <input type="checkbox" role="switch" class="switch" id="hideInterruptions"
+             data-setting="hideInterruptions" checked aria-describedby="paused-note hideInterruptions-help">
+      <p class="setting-help" id="hideInterruptions-help">Shown to ad-block users. Reclaim doesn’t block ads.</p>
+    </div>
+
+    <fieldset class="setting setting--choices">
+      <legend class="setting-label">Shorts</legend>
+      <div class="choices">
+        <div class="choice">
+          <input type="radio" name="shorts" id="shorts-show" value="show"
+                 data-setting="shorts" aria-describedby="paused-note shorts-show-help">
+          <label for="shorts-show">Everywhere</label>
+          <p class="choice-help" id="shorts-show-help">YouTube default, apart from Subscriptions below.</p>
+        </div>
+        <div class="choice">
+          <input type="radio" name="shorts" id="shorts-contain" value="contain"
+                 data-setting="shorts" checked aria-describedby="paused-note shorts-contain-help">
+          <label for="shorts-contain">Only in the Shorts tab</label>
+          <p class="choice-help" id="shorts-contain-help">The Shorts feed and channels’ Shorts tabs.</p>
+        </div>
+        <div class="choice">
+          <input type="radio" name="shorts" id="shorts-remove" value="remove"
+                 data-setting="shorts" aria-describedby="paused-note shorts-remove-help">
+          <label for="shorts-remove">Nowhere</label>
+          <p class="choice-help" id="shorts-remove-help">Shorts links open in the normal player.</p>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="setting">
+      <label class="setting-label" for="subscriptionsChronological">Plain Subscriptions feed, newest first</label>
+      <input type="checkbox" role="switch" class="switch" id="subscriptionsChronological"
+             data-setting="subscriptionsChronological" checked aria-describedby="paused-note subscriptionsChronological-help">
+      <p class="setting-help" id="subscriptionsChronological-help">Your channels only. No “Most&nbsp;relevant” or Shorts shelves.</p>
+    </div>
+  </section>
+
+  <!-- BROWSING: Home, Subscriptions, search, thumbnails, the left menu, site-wide promos -->
+  <section aria-labelledby="h-browsing">
+    <h2 id="h-browsing">Browsing</h2>
+
+    <div class="setting">
+      <label class="setting-label" for="homePage">Home page</label>
+      <span class="select">
+        <select id="homePage" data-setting="homePage" aria-describedby="paused-note homePage-help">
+          <option value="default">YouTube default</option>
+          <option value="finite" selected>First page only</option>
+          <option value="search">Search box only</option>
+          <option value="subscriptions">Subscriptions instead</option>
+        </select>
+      </span>
+      <p class="setting-help" id="homePage-help">“First&nbsp;page&nbsp;only” stops endless scrolling. “Subscriptions&nbsp;instead” needs you to be signed in.</p>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label" for="watchedVideos">Watched videos</label>
+      <span class="select">
+        <select id="watchedVideos" data-setting="watchedVideos" aria-describedby="paused-note watchedVideos-help">
+          <option value="show">YouTube default</option>
+          <option value="dim" selected>Dimmed</option>
+          <option value="hide">Hidden</option>
+        </select>
+      </span>
+      <p class="setting-help" id="watchedVideos-help">Videos you’ve watched 90% of, on Home, Subscriptions and Up next. Needs sign-in with watch history on.</p>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label" for="searchResultsOnly">Remove extra shelves from search</label>
+      <input type="checkbox" role="switch" class="switch" id="searchResultsOnly"
+             data-setting="searchResultsOnly" checked aria-describedby="paused-note searchResultsOnly-help">
+      <p class="setting-help" id="searchResultsOnly-help">Such as “People&nbsp;also&nbsp;watched” and “For&nbsp;you”. On news searches, “Top&nbsp;news” may go too.</p>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label" for="noHoverPreviews">Turn off hover previews</label>
+      <input type="checkbox" role="switch" class="switch" id="noHoverPreviews"
+             data-setting="noHoverPreviews" checked aria-describedby="paused-note noHoverPreviews-help">
+      <p class="setting-help" id="noHoverPreviews-help">Animated thumbnails too. Unlike YouTube’s “Inline&nbsp;playback”, works signed out and in private windows.</p>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label" for="quietGuide">Hide Explore and “More&nbsp;from&nbsp;YouTube” in the menu</label>
+      <input type="checkbox" role="switch" class="switch" id="quietGuide"
+             data-setting="quietGuide" checked aria-describedby="paused-note quietGuide-help">
+      <p class="setting-help" id="quietGuide-help">Includes the Premium link in “More&nbsp;from&nbsp;YouTube”.</p>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label" for="nagScrubber">Hide promo pop-ups and banners</label>
+      <input type="checkbox" role="switch" class="switch" id="nagScrubber"
+             data-setting="nagScrubber" checked aria-describedby="paused-note nagScrubber-help">
+      <p class="setting-help" id="nagScrubber-help">For Premium, the YouTube app and turning on watch history.</p>
+    </div>
+  </section>
+
+  <!-- WATCH PAGE: the Up next column, the player, audio, sharing -->
+  <section aria-labelledby="h-watch">
+    <h2 id="h-watch">Watch page</h2>
+
+    <div class="setting">
+      <label class="setting-label" for="upNext">Up next</label>
+      <span class="select">
+        <select id="upNext" data-setting="upNext" aria-describedby="paused-note upNext-help">
+          <option value="default">YouTube default</option>
+          <option value="finite" selected>First page only</option>
+          <option value="hidden">Hidden</option>
+        </select>
+      </span>
+      <p class="setting-help" id="upNext-help">Beside the player. Playlists, chat, chapters and transcripts stay.</p>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label" for="autoplayOff">Turn off Autoplay outside playlists</label>
+      <input type="checkbox" role="switch" class="switch" id="autoplayOff"
+             data-setting="autoplayOff" checked aria-describedby="paused-note autoplayOff-help">
+      <p class="setting-help" id="autoplayOff-help">Uses YouTube’s own switch, which may sync to your account. Turn it back on in the player and that tab keeps it.</p>
+    </div>
+
+    <fieldset class="setting-group" aria-describedby="player-help">
+      <legend class="setting-label">Video player</legend>
+      <p class="setting-help group-help" id="player-help">Never hidden: the autoplay countdown, paid-promotion notices, captions and controls.</p>
+      <div class="setting setting--nested">
+        <label class="setting-label" for="hideSuggestions">Hide suggested videos</label>
+        <input type="checkbox" role="switch" class="switch" id="hideSuggestions"
+               data-setting="hideSuggestions" checked aria-describedby="paused-note hideSuggestions-help">
+        <p class="setting-help" id="hideSuggestions-help">End-of-video wall, “More&nbsp;videos” on pause, fullscreen grid.</p>
+      </div>
+      <div class="setting setting--nested">
+        <label class="setting-label" for="hideCreatorOverlays">Hide creator overlays</label>
+        <input type="checkbox" role="switch" class="switch" id="hideCreatorOverlays"
+               data-setting="hideCreatorOverlays" checked aria-describedby="paused-note hideCreatorOverlays-help">
+        <p class="setting-help" id="hideCreatorOverlays-help">End-screen tiles, info cards and the channel watermark.</p>
+      </div>
+    </fieldset>
+
+    <div class="setting">
+      <label class="setting-label" for="originalAudio">Play original audio, not AI dubs</label>
+      <input type="checkbox" role="switch" class="switch" id="originalAudio"
+             data-setting="originalAudio" checked aria-describedby="paused-note originalAudio-help">
+      <p class="setting-help" id="originalAudio-help">Creator-made dubs and your own pick in the player are kept.</p>
+    </div>
+
+    <div class="setting">
+      <label class="setting-label" for="cleanLinks">Remove tracking from shared links</label>
+      <input type="checkbox" role="switch" class="switch" id="cleanLinks"
+             data-setting="cleanLinks" checked aria-describedby="paused-note cleanLinks-help">
+      <p class="setting-help" id="cleanLinks-help">Strips the si= and pp= tags from links you copy or share.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p class="promise"><strong>Nothing leaves your browser.</strong> Changes apply right away.</p>
+
+  <div class="footer-row" id="reset-idle">
+    <button type="button" class="button" id="reset-start">Reset to defaults…</button>
+    <div class="footer-end">
+      <span class="status" id="reset-status" role="status"></span>
+      <span class="version" id="version">Version <span data-version></span></span>
+      <button type="button" class="button" id="reset-undo" hidden>Undo</button>
+    </div>
+  </div>
+
+  <div class="confirm" id="reset-confirm" role="group" aria-labelledby="reset-question" hidden>
+    <p id="reset-question">Put every setting back to its default? The on/off switch at the top isn’t changed.</p>
+    <div class="confirm-buttons">
+      <button type="button" class="button button--primary" id="reset-yes">Reset settings</button>
+      <button type="button" class="button" id="reset-no">Cancel</button>
+    </div>
+  </div>
+</footer>
+
+<script src="../shared/settings.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

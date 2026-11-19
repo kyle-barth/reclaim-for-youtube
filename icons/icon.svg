@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Reclaim for YouTube: a disc with a large corner peeled back, i.e. the layer stuck on top being lifted off.
+       No letter (a letter in a disc reads as ®), not red, no rounded rectangle, no play triangle.
+       Teal #12877a is 3:1+ on all four Firefox toolbar colours (#f9f9fb, #f0f0f4, #2b2a33, #1c1b22).
+       The flap's edge is a solid 2-unit stroke (1px at 16px) in that teal, so the peel holds up on light toolbars,
+       where the pale flap alone would be only 1.3:1. -->
+  <defs><clipPath id="disc"><circle cx="16" cy="16" r="14.5"/></clipPath></defs>
+  <path d="M11.04 2.37A14.5 14.5 0 1 0 29.63 20.96Z" fill="#12877a"/>
+  <path d="M11.04 2.37A14.5 14.5 0 0 0 29.63 20.96Z" fill="#a8e6da" stroke="#12877a" stroke-width="2" stroke-linejoin="round" clip-path="url(#disc)"/>
+</svg>

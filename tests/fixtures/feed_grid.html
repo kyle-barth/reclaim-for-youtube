@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Feed grid - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<style> ytd-rich-item-renderer { height: 14px; overflow: hidden; } </style>
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-masthead>
+    <ytd-topbar-logo-renderer><a id="logo" href="/" data-test="logo">YouTube</a></ytd-topbar-logo-renderer>
+    <input name="search_query" data-test="searchbox" placeholder="Search">
+  </ytd-masthead>
+  <div id="page">
+    <tp-yt-app-drawer>
+      <ytd-guide-renderer>
+        <ytd-guide-section-renderer>
+          <ytd-guide-entry-renderer><a id="endpoint" href="/" title="Home" data-spa data-test="guide-home">Home</a></ytd-guide-entry-renderer>
+          <ytd-guide-entry-renderer><a id="endpoint" href="/feed/subscriptions" title="Subscriptions" data-spa data-test="guide-subs">Subscriptions</a></ytd-guide-entry-renderer>
+        </ytd-guide-section-renderer>
+      </ytd-guide-renderer>
+    </tp-yt-app-drawer>
+    <ytd-page-manager>
+      <ytd-browse page-subtype="home" data-test="browse">
+        <ytd-feed-filter-chip-bar-renderer data-test="chips">All · Music · Gaming</ytd-feed-filter-chip-bar-renderer>
+        <ytd-rich-grid-renderer data-test="grid"><div id="contents"></div></ytd-rich-grid-renderer>
+      </ytd-browse>
+    </ytd-page-manager>
+  </div>
+</ytd-app>
+<script>
+  (function () {
+    // ?subtype= lets the same grid stand in for Subscriptions or a channel (non-regression).
+    const subtype = new URLSearchParams(location.search).get('subtype') || 'home';
+    document.querySelector('ytd-browse').setAttribute('page-subtype', subtype);
+    const contents = document.querySelector('ytd-rich-grid-renderer #contents');
+    let n = 0;
+    window.__loads = 0;
+
+    function batch(count) {
+      for (let i = 0; i < count; i++) {
+        n++;
+        const item = document.createElement('ytd-rich-item-renderer');
+        item.setAttribute('data-test', 'tile');
+        const a = document.createElement('a');
+        a.href = '/watch?v=tile' + String(n).padStart(7, '0');
+        a.textContent = 'Video ' + n;
+        const lockup = document.createElement('yt-lockup-view-model');
+        lockup.append(a);
+        item.append(lockup);
+        contents.append(item);
+      }
+      // Like YouTube: a continuation element that loads the next batch when it becomes visible.
+      const cont = document.createElement('ytd-continuation-item-renderer');
+      cont.setAttribute('data-test', 'continuation');
+      cont.textContent = 'loading…';
+      cont.style.display = 'block';
+      contents.append(cont);
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          cont.remove();
+          window.__loads++;
+          batch(24);
+        }
+      });
+      io.observe(cont);
+    }
+
+    const section = document.createElement('ytd-rich-section-renderer');
+    section.setAttribute('data-test', 'home-section');
+    section.innerHTML = '<div id="content"><ytd-feed-nudge-renderer data-test="nudge">Your YouTube history is off</ytd-feed-nudge-renderer></div>';
+    contents.append(section);
+    batch(24);
+
+    // Stand-in for YouTube's router: in-app links navigate without a reload.
+    window.__routerClicks = 0;
+    window.__noReload = true;
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[data-spa]');
+      if (!a || e.defaultPrevented) return;
+      e.preventDefault();
+      window.__routerClicks++;
+      window.__fx.navigate(a.getAttribute('href'));
+    });
+  })();
+</script>
+</body>
+</html>

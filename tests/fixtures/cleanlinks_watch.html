@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A video - YouTube (clean links fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+<style>
+  button, input, textarea, a { display: block; margin: 6px; }
+  input { width: 640px; }
+  textarea { width: 640px; height: 60px; }
+</style>
+</head>
+<body>
+<!-- Served at /watch?v=x&fx=cleanlinks_watch. Page scripts below play YouTube's part: copy
+     buttons that call navigator.clipboard.writeText the way page code does, a share box, and
+     links with tracking parameters. Every writeText call records its outcome in __results. -->
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-watch-flexy>
+      <button data-test="write">Copy (writes window.__text)</button>
+      <button data-test="detached">Copy (detached writeText)</button>
+      <button data-test="wrong-this">Copy (writeText.call({}))</button>
+      <button data-test="copy-command">Copy (execCommand, like YouTube's Share → Copy)</button>
+      <input data-test="share" value="https://www.youtube.com/watch?v=abc123XYZ00&amp;pp=ygUDZm9v">
+      <textarea data-test="paste"></textarea>
+      <a data-test="link" href="/watch?v=x&amp;pp=y">A search result</a>
+      <a data-test="external" href="https://example.com/page?si=1&amp;pp=2">Someone else's site</a>
+    </ytd-watch-flexy>
+  </ytd-page-manager>
+</ytd-app>
+<script>
+(function () {
+  'use strict';
+  const results = (window.__results = []);
+  window.__text = 'https://youtu.be/abc123XYZ00?si=TRACK&t=42';
+  const DETACHED = 'https://youtu.be/abc123XYZ00?si=X';
+
+  function track(run) {
+    let promise;
+    try {
+      promise = run();
+    } catch (e) {
+      results.push('threw: ' + e);
+      return;
+    }
+    Promise.resolve(promise).then(() => results.push('resolved'), (e) => results.push('rejected: ' + e));
+  }
+  const on = (name, fn) => document.querySelector(`[data-test="${name}"]`).addEventListener('click', fn);
+
+  on('write', () => track(() => navigator.clipboard.writeText(window.__text)));
+  on('detached', () => track(() => {
+    const w = navigator.clipboard.writeText;
+    return w(DETACHED);
+  }));
+  on('wrong-this', () => track(() => navigator.clipboard.writeText.call({}, DETACHED)));
+  // YouTube's Share → Copy (live, 2026-11-19): select the share box, then execCommand('copy').
+  on('copy-command', () => {
+    const box = document.querySelector('[data-test="share"]');
+    box.focus();
+    box.select();
+    results.push(document.execCommand('copy') ? 'copied' : 'not copied');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A Channel - Shorts - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-browse page-subtype="channels">
+      <ytd-tabbed-page-header>
+        <yt-tab-group-shape>
+          <yt-tab-shape tab-title="Home">Home</yt-tab-shape>
+          <yt-tab-shape tab-title="Videos">Videos</yt-tab-shape>
+          <yt-tab-shape tab-title="Shorts" data-test="tab-shorts">Shorts</yt-tab-shape>
+        </yt-tab-group-shape>
+      </ytd-tabbed-page-header>
+      <ytd-rich-grid-renderer>
+        <div id="contents">
+          <ytd-rich-item-renderer data-test="channel-short-tile"><ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href="/shorts/eeeeeeeeee1">Channel short 1</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2></ytd-rich-item-renderer>
+          <ytd-rich-item-renderer data-test="channel-short-tile"><ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href="/shorts/eeeeeeeeee2">Channel short 2</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2></ytd-rich-item-renderer>
+        </div>
+      </ytd-rich-grid-renderer>
+    </ytd-browse>
+  </ytd-page-manager>
+</ytd-app>
+</body>
+</html>

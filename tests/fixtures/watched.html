@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Watched - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<style> yt-thumbnail-overlay-progress-bar-view-model, ytd-thumbnail-overlay-resume-playback-renderer, ytd-rich-grid-row { display: block; } </style>
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-page-manager>
+    <!-- ?scope= puts the same tiles under a different surface (subscriptions | search | channels) -->
+    <ytd-browse page-subtype="subscriptions" data-test="browse">
+      <ytd-rich-grid-renderer><div id="contents" data-test="grid"></div></ytd-rich-grid-renderer>
+      <ytd-rich-grid-row data-test="legacy-row"></ytd-rich-grid-row>
+    </ytd-browse>
+  </ytd-page-manager>
+</ytd-app>
+<script>
+  (function () {
+    const lockupTile = (pct, name) => {
+      const item = document.createElement('ytd-rich-item-renderer');
+      item.setAttribute('data-test', name);
+      const bar = pct === null ? '' :
+        '<yt-thumbnail-overlay-progress-bar-view-model><div class="ytThumbnailOverlayProgressBarHost">' +
+        '<div class="ytThumbnailOverlayProgressBarHostWatchedProgressBar"><div class="ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment" style="width: ' + pct + '%;"></div></div>' +
+        '</div></yt-thumbnail-overlay-progress-bar-view-model>';
+      item.innerHTML = '<yt-lockup-view-model><a href="/watch?v=' + name.padEnd(11, 'x').slice(0, 11) + '">' + name + '</a>' + bar + '</yt-lockup-view-model>';
+      return item;
+    };
+    const grid = document.querySelector('#contents');
+    [[100, 'w100'], [95, 'w95'], [92, 'w92'], [89, 'w89'], [40, 'w40'], [null, 'wnone']].forEach(([p, n]) => grid.append(lockupTile(p, n)));
+    const legacy = document.createElement('ytd-rich-item-renderer');
+    legacy.setAttribute('data-test', 'legacy100');
+    legacy.innerHTML = '<a href="/watch?v=legacyxxxxx">legacy</a><ytd-thumbnail-overlay-resume-playback-renderer><div id="progress" style="width: 100%;"></div></ytd-thumbnail-overlay-resume-playback-renderer>';
+    grid.append(legacy);
+    document.querySelector('ytd-rich-grid-row').append(lockupTile(100, 'row100'));
+
+    const scope = new URLSearchParams(location.search).get('scope');
+    if (scope === 'search') {
+      const search = document.createElement('ytd-search');
+      search.append(document.querySelector('ytd-rich-grid-renderer'));
+      document.querySelector('ytd-browse').replaceWith(search);
+    } else if (scope) {
+      document.querySelector('ytd-browse').setAttribute('page-subtype', scope);
+    }
+    window.__fx.lockupTile = lockupTile;
+  })();
+</script>
+</body>
+</html>

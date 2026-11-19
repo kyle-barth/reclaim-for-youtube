@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Shown while Reclaim is off (browser.action.setIcon), together with the title "Reclaim for YouTube: off".
+       The same silhouette in grey #84838f, which is 3:1+ on all four Firefox toolbar colours. -->
+  <defs><clipPath id="disc"><circle cx="16" cy="16" r="14.5"/></clipPath></defs>
+  <path d="M11.04 2.37A14.5 14.5 0 1 0 29.63 20.96Z" fill="#84838f"/>
+  <path d="M11.04 2.37A14.5 14.5 0 0 0 29.63 20.96Z" fill="#e4e4ea" stroke="#84838f" stroke-width="2" stroke-linejoin="round" clip-path="url(#disc)"/>
+</svg>

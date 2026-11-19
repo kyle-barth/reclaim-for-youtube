@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Up next - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<style> yt-lockup-view-model { height: 12px; overflow: hidden; } ytd-comments, ytd-playlist-panel-renderer, ytd-engagement-panel-section-list-renderer, ytd-continuation-item-renderer { display: block; } </style>
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-page-manager>
+    <ytd-watch-flexy>
+      <div id="primary">
+        <ytd-player><div id="movie_player"><video></video></div></ytd-player>
+        <ytd-comments data-test="comments"><div id="comment-list"></div></ytd-comments>
+      </div>
+      <div id="secondary">
+        <ytd-playlist-panel-renderer data-test="playlist">Playlist panel</ytd-playlist-panel-renderer>
+        <ytd-engagement-panel-section-list-renderer target-id="engagement-panel-structured-description" data-test="panel">Description panel</ytd-engagement-panel-section-list-renderer>
+        <ytd-watch-next-secondary-results-renderer data-test="related">
+          <ytd-item-section-renderer><div id="contents"></div></ytd-item-section-renderer>
+        </ytd-watch-next-secondary-results-renderer>
+      </div>
+    </ytd-watch-flexy>
+  </ytd-page-manager>
+</ytd-app>
+<script>
+  (function () {
+    function loader(container, make, count, counterName) {
+      window[counterName] = 0;
+      function batch() {
+        for (let i = 0; i < count; i++) container.append(make());
+        const cont = document.createElement('ytd-continuation-item-renderer');
+        cont.textContent = 'loading…';
+        container.append(cont);
+        const io = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect(); cont.remove(); window[counterName]++; batch();
+          }
+        });
+        io.observe(cont);
+      }
+      batch();
+    }
+    let v = 0;
+    loader(document.querySelector('ytd-watch-next-secondary-results-renderer #contents'), () => {
+      const l = document.createElement('yt-lockup-view-model');
+      l.setAttribute('data-test', 'related-video');
+      l.innerHTML = '<a href="/watch?v=rel' + String(++v).padStart(8, '0') + '">related</a>';
+      return l;
+    }, 20, '__relatedLoads');
+    loader(document.querySelector('#comment-list'), () => {
+      const c = document.createElement('div');
+      c.textContent = 'a comment';
+      c.style.height = '10px';
+      return c;
+    }, 5, '__commentLoads');
+  })();
+</script>
+</body>
+</html>

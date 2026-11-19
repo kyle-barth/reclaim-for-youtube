@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Audio tracks - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-page-manager>
+    <ytd-watch-flexy>
+      <ytd-player><div id="movie_player" class="html5-video-player"><video></video></div></ytd-player>
+    </ytd-watch-flexy>
+  </ytd-page-manager>
+</ytd-app>
+<script>
+  // Stub of the player's audio-track API as page-world expandos, like the real player.
+  // Ids mimic "<lang>.<n>;<base64 metadata>". ?scenario= picks the case.
+  (function () {
+    const mp = document.getElementById('movie_player');
+    const video = mp.querySelector('video');
+    const mk = (lang, n, type) => ({ id: lang + '.' + n + ';' + btoa('acont=' + type + ':lang=' + lang) });
+    const scenario = new URLSearchParams(location.search).get('scenario');
+    let tracks = [];
+    let current = null;
+    let reads = 0; // 'reentrant': track id reads
+    const original = mk('en', 1, 'original');
+    const autoDub = mk('es', 2, 'dubbed-auto');
+    const creatorDub = mk('fr', 3, 'dubbed');
+    switch (scenario) {
+      case 'auto': tracks = [original, autoDub, creatorDub]; current = autoDub; break;
+      case 'creator': tracks = [original, autoDub, creatorDub]; current = creatorDub; break;
+      case 'original': tracks = [original, autoDub]; current = original; break;
+      case 'no-original': tracks = [autoDub, creatorDub]; current = autoDub; break;
+      case 'two-originals': tracks = [original, mk('de', 4, 'original'), autoDub]; current = autoDub; break;
+      case 'malformed': tracks = [{ id: 'en.1' }, { id: 'es.2;%%%not base64%%%' }]; current = tracks[1]; break;
+      case 'late': setTimeout(() => { tracks = [original, autoDub]; current = autoDub; }, 500); break;
+      case 'never': break;
+      case 'refuses': tracks = [original, autoDub]; current = autoDub; break;
+      case 'reentrant':
+        // A hostile player: reading a track's id re-fires loadedmetadata, which re-enters the
+        // add-on from inside its own decision. Capped so an unguarded add-on can't hang the tab.
+        tracks = [original, autoDub].map((t) => Object.defineProperty({}, 'id', {
+          get() {
+            reads++;
+            if (reads < 2000) video.dispatchEvent(new Event('loadedmetadata'));
+            return t.id;
+          },
+        }));
+        current = tracks[1];
+        break;
+    }
+    window.__audio = {
+      selectDub() { current = autoDub; },
+      calls: () => Number(mp.dataset.calls || 0),
+      reads: () => reads,
+    };
+    mp.dataset.calls = '0';
+    if (scenario === 'nomethods') return;
+    mp.getAvailableAudioTracks = () => tracks;
+    mp.getAudioTrack = () => current;
+    mp.getPlayerResponse = () => ({ videoDetails: { videoId: new URLSearchParams(location.search).get('v') } });
+    mp.setAudioTrack = (t) => {
+      mp.dataset.calls = String(Number(mp.dataset.calls) + 1);
+      mp.dataset.lastSet = t && t.id;
+      if (scenario === 'refuses') return false;
+      current = t;
+      video.dispatchEvent(new Event('loadedmetadata')); // the real player may fire this again
+      return true;
+    };
+  })();
+</script>
+</body>
+</html>

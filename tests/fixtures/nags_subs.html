@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Subscriptions - YouTube (nag scrubber fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+<style>ytd-feed-nudge-renderer { display: block; padding: 6px; }</style>
+</head>
+<body>
+<!-- Served at /feed/subscriptions?fx=nags_subs. (h): the same nudge markup as on home, under
+     page-subtype="subscriptions", where the Nag scrubber must leave it alone. -->
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-browse page-subtype="subscriptions">
+      <ytd-rich-grid-renderer>
+        <div id="contents">
+          <ytd-rich-section-renderer data-test="subs-nudge">
+            <div id="content"><ytd-feed-nudge-renderer>Your YouTube history is off. <a href="/feed/history">Turn it on</a></ytd-feed-nudge-renderer></div>
+          </ytd-rich-section-renderer>
+          <ytd-rich-item-renderer data-test="subs-video">
+            <yt-lockup-view-model><a href="/watch?v=cccccccccc1">A subscribed video</a></yt-lockup-view-model>
+          </ytd-rich-item-renderer>
+        </div>
+      </ytd-rich-grid-renderer>
+    </ytd-browse>
+  </ytd-page-manager>
+</ytd-app>
+</body>
+</html>

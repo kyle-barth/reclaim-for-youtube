@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Reclaim for YouTube",
+  "short_name": "Reclaim",
+  "version": "1.0.0",
+  "description": "Take YouTube back: Shorts only in the Shorts tab, a chronological subscriptions feed, and no ad-block nag popups.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{2b57d476-e56c-40fa-b087-a73583480a0d}",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "permissions": ["storage"],
+  "background": {
+    "scripts": ["src/shared/settings.js", "src/background.js"]
+  },
+  "host_permissions": ["https://www.youtube.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "run_at": "document_start",
+      "all_frames": false,
+      "css": ["src/content/content.css", "src/content/nags.css"],
+      "js": [
+        "src/shared/settings.js",
+        "src/content/core.js",
+        "src/content/features/interruptions.js",
+        "src/content/features/shorts.js",
+        "src/content/features/subscriptions.js",
+        "src/content/features/autoplay.js",
+        "src/content/features/hover.js",
+        "src/content/features/feeds.js",
+        "src/content/features/watched.js",
+        "src/content/features/audio.js",
+        "src/content/features/nags.js",
+        "src/content/features/cleanlinks.js"
+      ]
+    }
+  ],
+  "action": {
+    "default_title": "Reclaim for YouTube",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": "icons/icon.svg"
+  },
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  }
+}

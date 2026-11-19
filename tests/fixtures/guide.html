@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Guide - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <tp-yt-app-drawer>
+    <ytd-guide-renderer>
+      <ytd-guide-section-renderer data-test="sec-main">
+        <ytd-guide-entry-renderer data-test="home"><a id="endpoint" href="/" title="Home">Home</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer data-test="shorts"><a id="endpoint" title="Shorts">Shorts</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer data-test="subs"><a id="endpoint" href="/feed/subscriptions" title="Subscriptions">Subscriptions</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer data-test="main-premium"><a id="endpoint" href="/premium" title="Try Premium">Try Premium</a></ytd-guide-entry-renderer>
+      </ytd-guide-section-renderer>
+      <ytd-guide-section-renderer data-test="sec-subscriptions">
+        <ytd-guide-entry-renderer><a id="endpoint" href="/@somecreator">Some creator</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer data-test="sub-music-topic"><a id="endpoint" href="/channel/UC-9-kyTW8ZkZNDHQJ6FgpwQ">Music</a></ytd-guide-entry-renderer>
+      </ytd-guide-section-renderer>
+      <ytd-guide-section-renderer data-test="sec-you">
+        <ytd-guide-entry-renderer><a id="endpoint" href="/feed/history">History</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer><a id="endpoint" href="https://studio.youtube.com/channel/UCxxxxxxxxxxxxxxxx/videos">Your videos</a></ytd-guide-entry-renderer>
+      </ytd-guide-section-renderer>
+      <ytd-guide-section-renderer data-test="sec-explore">
+        <h3 id="guide-section-title">Explore</h3>
+        <ytd-guide-entry-renderer><a id="endpoint" href="/channel/UC-9-kyTW8ZkZNDHQJ6FgpwQ">Music</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer><a id="endpoint" href="/feed/storefront?bp=ogUCKAU%3D">Movies &amp; TV</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer><a id="endpoint" href="/channel/UC4R8DWoMoI7CAwX8_LjQHig">Live</a></ytd-guide-entry-renderer>
+      </ytd-guide-section-renderer>
+      <ytd-guide-section-renderer data-test="sec-more">
+        <h3 id="guide-section-title">More from YouTube</h3>
+        <ytd-guide-entry-renderer><a id="endpoint" href="/premium">Try Premium for $0</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer><a id="endpoint" href="https://music.youtube.com/">YouTube Music</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer><a id="endpoint" href="https://www.youtubekids.com/?source=youtube_web">YouTube Kids</a></ytd-guide-entry-renderer>
+      </ytd-guide-section-renderer>
+      <ytd-guide-section-renderer data-test="sec-settings">
+        <ytd-guide-entry-renderer><a id="endpoint" href="/account">Settings</a></ytd-guide-entry-renderer>
+        <ytd-guide-entry-renderer><a id="endpoint" href="/reporthistory">Report history</a></ytd-guide-entry-renderer>
+      </ytd-guide-section-renderer>
+      <div id="footer" data-test="footer"><a href="https://www.youtube.com/about/">About</a> <a href="/t/terms">Terms</a></div>
+    </ytd-guide-renderer>
+  </tp-yt-app-drawer>
+</ytd-app>
+</body>
+</html>

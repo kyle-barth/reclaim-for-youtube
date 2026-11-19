@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home - YouTube (nag scrubber fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+<style>
+  ytd-banner-promo-renderer, ytd-statement-banner-renderer, ytd-mealbar-promo-renderer,
+  yt-mealbar-promo-renderer, ytd-feed-nudge-renderer, tp-yt-paper-dialog {
+    display: block; padding: 6px; margin: 4px; border: 1px solid #999;
+  }
+</style>
+</head>
+<body>
+<!-- Served at /?fx=nags_home. Banners and mealbars are inline (not in a dialog), so CSS alone
+     decides them. Every promo container has a listed promo link; every "keep-" element is a
+     near miss that must stay visible. -->
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-browse page-subtype="home">
+      <ytd-rich-grid-renderer>
+        <div id="header">
+          <!-- (c) -->
+          <ytd-banner-promo-renderer data-test="banner-premium">
+            Try YouTube Premium free <a href="/premium">Get it</a>
+          </ytd-banner-promo-renderer>
+          <ytd-banner-promo-renderer data-test="banner-trending">
+            What's on <a href="/feed/trending">Trending</a>
+          </ytd-banner-promo-renderer>
+
+          <!-- every listed promo destination, in both banner tags and inline mealbars -->
+          <ytd-statement-banner-renderer data-test="promo-premium-query"><a href="/premium?src=banner">Premium</a></ytd-statement-banner-renderer>
+          <ytd-statement-banner-renderer data-test="promo-premium-absolute"><a href="https://www.youtube.com/premium?ybp=1">Premium</a></ytd-statement-banner-renderer>
+          <ytd-statement-banner-renderer data-test="promo-paid-memberships"><a href="/paid_memberships?ybp=x">Plans</a></ytd-statement-banner-renderer>
+          <ytd-banner-promo-renderer data-test="promo-music"><a href="https://music.youtube.com/">YouTube Music</a></ytd-banner-promo-renderer>
+          <ytd-banner-promo-renderer data-test="promo-music-premium"><a href="/musicpremium">Music Premium</a></ytd-banner-promo-renderer>
+          <ytd-banner-promo-renderer data-test="promo-tv"><a href="https://tv.youtube.com/welcome">YouTube TV</a></ytd-banner-promo-renderer>
+          <ytd-mealbar-promo-renderer data-test="promo-notifications"><a href="/account_notifications">Turn on notifications</a></ytd-mealbar-promo-renderer>
+          <yt-mealbar-promo-renderer data-test="promo-app-ios"><a href="https://apps.apple.com/app/youtube/id544007664">Get the app</a></yt-mealbar-promo-renderer>
+          <yt-mealbar-promo-renderer data-test="promo-app-android"><a href="https://play.google.com/store/apps/details?id=com.google.android.youtube">Get the app</a></yt-mealbar-promo-renderer>
+          <ytd-mealbar-promo-renderer data-test="promo-inline-mealbar"><span>Try Premium</span><div><a href="/premium?src=mealbar">Try it free</a></div></ytd-mealbar-promo-renderer>
+
+          <!-- near misses -->
+          <ytd-statement-banner-renderer data-test="keep-premium-lookalike"><a href="/premiumx">Not the Premium page</a></ytd-statement-banner-renderer>
+          <ytd-mealbar-promo-renderer data-test="keep-tos-inline"><a href="https://www.youtube.com/t/terms">Terms of Service updated</a></ytd-mealbar-promo-renderer>
+          <ytd-banner-promo-renderer data-test="keep-no-link">A promo with no link at all (documented gap)</ytd-banner-promo-renderer>
+          <div data-test="keep-plain-link">Not a promo container: <a href="/premium">Premium</a></div>
+        </div>
+        <div id="contents">
+          <!-- (h) the history-off nudge, home only -->
+          <ytd-rich-section-renderer data-test="home-nudge">
+            <div id="content"><ytd-feed-nudge-renderer>Your YouTube history is off. <a href="/feed/history">Turn it on</a></ytd-feed-nudge-renderer></div>
+          </ytd-rich-section-renderer>
+          <ytd-rich-section-renderer data-test="home-other-section"><div id="content">Some other section</div></ytd-rich-section-renderer>
+          <ytd-rich-item-renderer data-test="home-video">
+            <yt-lockup-view-model><a href="/watch?v=aaaaaaaaaa1">A normal video</a></yt-lockup-view-model>
+          </ytd-rich-item-renderer>
+        </div>
+      </ytd-rich-grid-renderer>
+    </ytd-browse>
+  </ytd-page-manager>
+  <button data-test="stub-banner" data-delay="200">Premium-only feature (inserts a promo banner)</button>
+  <ytd-popup-container>
+    <!-- (a) a mealbar dialog with a promo link and no backdrop: CSS hides the dialog -->
+    <tp-yt-paper-dialog data-test="static-mealbar-dialog">
+      <ytd-mealbar-promo-renderer><span>Try YouTube Premium</span><div><a href="/premium?src=mealbar">Try it free</a></div></ytd-mealbar-promo-renderer>
+    </tp-yt-paper-dialog>
+    <!-- (b) the same tag, Terms-of-Service style, no promo link: stays -->
+    <tp-yt-paper-dialog data-test="static-tos-dialog">
+      <ytd-mealbar-promo-renderer><span>We're updating our Terms</span><div><a href="/t/terms">Review</a></div></ytd-mealbar-promo-renderer>
+    </tp-yt-paper-dialog>
+    <tp-yt-paper-toast id="toast" style="display:none"></tp-yt-paper-toast>
+  </ytd-popup-container>
+</ytd-app>
+<script>
+  // A Premium-only button: YouTube explains it with a promo banner shortly after the click.
+  document.querySelector('[data-test="stub-banner"]').addEventListener('click', (event) => {
+    const delay = Number(event.currentTarget.dataset.delay);
+    setTimeout(() => {
+      const banner = document.createElement('ytd-banner-promo-renderer');
+      banner.dataset.test = 'inserted-banner';
+      banner.dataset.probe = '';
+      const a = document.createElement('a');
+      a.href = '/premium';
+      a.textContent = 'This feature needs Premium';
+      banner.append(a);
+      document.querySelector('#header').prepend(banner);
+    }, delay);
+  });
+
+  // Per-frame probe: counts frames in which a [data-probe] element was connected but not displayed.
+  window.__probe = { hidden: {}, frames: {} };
+  (function loop() {
+    for (const el of document.querySelectorAll('[data-probe]')) {
+      const key = el.dataset.test;
+      window.__probe.frames[key] = (window.__probe.frames[key] || 0) + 1;
+      if (getComputedStyle(el).display === 'none') window.__probe.hidden[key] = (window.__probe.hidden[key] || 0) + 1;
+    }
+    requestAnimationFrame(loop);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+/*
+ * Nag scrubber – CSS half. The JS half (features/nags.js) only ever un-hides (solicited marks)
+ * or closes a modal promo through the dialog's own dismissal; it never hides anything.
+ *
+ * Rule shape: a listed promo CONTAINER that holds a listed PROMO LINK. Either alone matches
+ * nothing, so a Terms of Service or policy notice that reuses a mealbar can't be hidden.
+ *
+ *   Banners:  ytd-banner-promo-renderer, ytd-statement-banner-renderer
+ *   Mealbars: ytd-mealbar-promo-renderer, yt-mealbar-promo-renderer
+ *   Promo links (prefix-anchored hrefs, so every UI language matches): see the lists below.
+ *   Keep both lists in sync with CONTAINERS / PROMO_LINKS in features/nags.js.
+ *
+ * Never matched, by construction: core 1's "Experiencing interruptions?" toast
+ * (tp-yt-paper-toast) and the ad-blocker enforcement dialog (ytd-enforcement-message-view-model)
+ * are not listed containers.
+ *
+ * :has() can't be nested, so the dialog rule spells "a mealbar child that holds a promo link"
+ * as one relative selector (> mealbar a[href…]) instead of mealbar:has(a[href…]).
+ */
+
+/* Inline promos (home banners, a mealbar outside any dialog). Never anything inside a dialog:
+   dialogs are handled by the next rule or, when modal, by JS only. */
+html[data-rfy][data-rfy-nag-scrubber] :is(
+  ytd-banner-promo-renderer,
+  ytd-statement-banner-renderer,
+  ytd-mealbar-promo-renderer,
+  yt-mealbar-promo-renderer
+):not(tp-yt-paper-dialog *):not([data-rfy-solicited]):has(
+  a[href="/premium"],
+  a[href^="/premium?"],
+  a[href^="https://www.youtube.com/premium"],
+  a[href^="/paid_memberships"],
+  a[href^="https://music.youtube.com"],
+  a[href^="/musicpremium"],
+  a[href^="https://tv.youtube.com"],
+  a[href^="/account_notifications"],
+  a[href^="https://apps.apple.com/"],
+  a[href^="https://play.google.com/store/apps/"]
+) {
+  display: none !important;
+}
+
+/* Mealbar dialogs, and only while no overlay backdrop is attached. While any backdrop is
+   attached, CSS steps back from every dialog, so a modal is never left hidden behind a
+   dimmed, click-blocking backdrop. (Accepted cosmetic edge: an earlier hidden mealbar shows,
+   dimmed, while one of the user's own modals is open.) */
+html[data-rfy][data-rfy-nag-scrubber]:not(:has(> body > tp-yt-iron-overlay-backdrop))
+  ytd-popup-container tp-yt-paper-dialog:has(
+    > :is(ytd-mealbar-promo-renderer, yt-mealbar-promo-renderer):not([data-rfy-solicited]) :is(
+      a[href="/premium"],
+      a[href^="/premium?"],
+      a[href^="https://www.youtube.com/premium"],
+      a[href^="/paid_memberships"],
+      a[href^="https://music.youtube.com"],
+      a[href^="/musicpremium"],
+      a[href^="https://tv.youtube.com"],
+      a[href^="/account_notifications"],
+      a[href^="https://apps.apple.com/"],
+      a[href^="https://play.google.com/store/apps/"]
+    )
+  ) {
+  display: none !important;
+}
+
+/* The home-page feed nudge ("Your YouTube history is off…" and its signed-out sibling). Home
+   only: the same renderer elsewhere is not ours to hide. */
+html[data-rfy][data-rfy-nag-scrubber] ytd-browse[page-subtype="home"] ytd-rich-section-renderer:has(ytd-feed-nudge-renderer) {
+  display: none !important;
+}

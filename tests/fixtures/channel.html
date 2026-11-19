@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A Channel - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-browse page-subtype="channels">
+      <ytd-tabbed-page-header>
+        <yt-tab-group-shape>
+          <yt-tab-shape tab-title="Home" data-test="tab-home">Home</yt-tab-shape>
+          <yt-tab-shape tab-title="Videos" data-test="tab-videos">Videos</yt-tab-shape>
+          <yt-tab-shape tab-title="Shorts" data-test="tab-shorts">Shorts</yt-tab-shape>
+          <yt-tab-shape tab-title="Playlists" data-test="tab-playlists">Playlists</yt-tab-shape>
+        </yt-tab-group-shape>
+      </ytd-tabbed-page-header>
+      <ytd-rich-grid-renderer>
+        <div id="contents">
+          <ytd-rich-item-renderer data-test="channel-video"><yt-lockup-view-model><a href="/watch?v=cccccccccc1">Channel video</a></yt-lockup-view-model></ytd-rich-item-renderer>
+          <ytd-rich-section-renderer data-test="channel-shorts-section">
+            <div id="content"><ytd-reel-shelf-renderer><a href="/shorts/cccccccccc2">Channel shorts shelf</a></ytd-reel-shelf-renderer></div>
+          </ytd-rich-section-renderer>
+        </div>
+      </ytd-rich-grid-renderer>
+    </ytd-browse>
+  </ytd-page-manager>
+</ytd-app>
+</body>
+</html>

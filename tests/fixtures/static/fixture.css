@@ -1,0 +1,21 @@
+/* Fixture look: just enough layout that elements have boxes and visibility is meaningful. */
+body { font: 14px system-ui, sans-serif; margin: 0; }
+ytd-app, ytd-masthead, ytd-page-manager, ytd-browse, ytd-search, ytd-watch-flexy, ytd-shorts,
+ytd-rich-grid-renderer, ytd-rich-section-renderer, ytd-rich-item-renderer, ytd-rich-shelf-renderer,
+ytd-reel-shelf-renderer, grid-shelf-view-model, yt-lockup-view-model, ytd-video-renderer,
+ytd-item-section-renderer, ytd-section-list-renderer, ytd-two-column-search-results-renderer,
+ytd-watch-next-secondary-results-renderer, ytd-guide-renderer, ytd-guide-section-renderer,
+ytd-guide-entry-renderer, ytd-mini-guide-renderer, ytd-mini-guide-entry-renderer,
+tp-yt-app-drawer, ytd-popup-container, yt-notification-action-renderer, ytm-shorts-lockup-view-model-v2,
+ytm-shorts-lockup-view-model, ytd-reel-video-renderer, yt-tab-group-shape, ytd-tabbed-page-header,
+ytd-post-renderer, ytd-mini-game-card-view-model, yt-chip-cloud-renderer, ytd-ad-slot-renderer,
+ytd-notification-renderer, ytd-player, ytd-watch-metadata, ytd-text-inline-expander {
+  display: block;
+}
+#page { display: flex; }
+tp-yt-app-drawer { width: 220px; }
+ytd-page-manager { flex: 1; }
+yt-tab-shape, yt-chip-cloud-chip-renderer { display: inline-block; padding: 4px 10px; margin: 2px; border: 1px solid #ccc; }
+tp-yt-paper-toast#toast { position: fixed; left: 12px; bottom: 12px; width: 360px; height: 72px; background: #222; color: #fff; z-index: 10; }
+#under-toast { position: fixed; left: 12px; bottom: 12px; width: 360px; height: 72px; background: #eee; }
+a { display: inline-block; min-height: 1em; }

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A video - YouTube (nag scrubber dialogs fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+<style>
+  tp-yt-paper-dialog { display: block; position: fixed; left: 40px; bottom: 40px; width: 420px; padding: 12px; background: #fff; border: 1px solid #333; z-index: 2202; }
+  tp-yt-iron-overlay-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 2199; }
+  ytd-mealbar-promo-renderer, yt-mealbar-promo-renderer, ytd-enforcement-message-view-model { display: block; }
+  #movie_player video { width: 320px; height: 180px; background: #000; }
+  #filler { height: 3000px; }
+</style>
+</head>
+<body>
+<!-- Served at /watch?v=x&fx=nags_watch. Dialogs are created per test by __fx.dialog(); the page
+     starts with no open dialog, so the "only open dialog" rule is under each test's control.
+     tp-yt-paper-dialog is a page-world stand-in for iron-overlay:
+       open():  removes aria-hidden now; next frame shows it and, for a modal, attaches the shared
+                backdrop to <body>, locks body scroll and (optionally) pauses the video.
+       cancel()/close(): the dialog's own dismissal. Counted in data-dismiss-calls; closes it the
+                way iron-overlay does (aria-hidden="true", display:none, backdrop and scroll lock
+                released once no modal is left). data-noop-dismiss makes it a no-op.
+       userClose(): the user's own close button (not counted). -->
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-watch-flexy>
+      <div id="primary">
+        <ytd-player><div id="movie_player" class="html5-video-player"><video class="html5-main-video" data-test="main-video" muted></video></div></ytd-player>
+        <button data-test="share-button">Share</button>
+        <button data-test="stub-mealbar" data-delay="200" data-name="solicited">Premium-only feature (shows a mealbar)</button>
+        <button data-test="stub-reopen" data-target="reused">Premium-only feature (re-shows the reused mealbar)</button>
+      </div>
+    </ytd-watch-flexy>
+  </ytd-page-manager>
+  <div id="filler">tall page, so the scroll lock matters</div>
+  <ytd-popup-container>
+    <tp-yt-paper-toast id="toast" style="display:none"></tp-yt-paper-toast>
+  </ytd-popup-container>
+</ytd-app>
+<script>
+(function () {
+  'use strict';
+  const fx = window.__fx;
+  const popup = document.querySelector('ytd-popup-container');
+  const backdrop = document.createElement('tp-yt-iron-overlay-backdrop');
+
+  function html(markup) {
+    const t = document.createElement('template');
+    t.innerHTML = markup.trim();
+    return t.content;
+  }
+
+  function modalOpen() {
+    return [...popup.querySelectorAll('tp-yt-paper-dialog[with-backdrop]')].some((d) => d.getAttribute('aria-hidden') !== 'true');
+  }
+
+  class PaperDialog extends HTMLElement {
+    open() {
+      this.removeAttribute('aria-hidden');
+      requestAnimationFrame(() => {
+        if (this.getAttribute('aria-hidden') === 'true') return;
+        this.style.display = '';
+        if (!this.hasAttribute('with-backdrop')) return;
+        if (!backdrop.parentNode) document.body.append(backdrop);
+        backdrop.setAttribute('opened', '');
+        document.body.style.overflow = 'hidden';
+        if (this.hasAttribute('data-pauses-video')) {
+          const v = document.querySelector('#movie_player video');
+          if (!v.paused) v.pause();
+        }
+      });
+    }
+    _dismiss() {
+      this.dataset.dismissCalls = String(Number(this.dataset.dismissCalls || 0) + 1);
+      if (!this.hasAttribute('data-noop-dismiss')) this._close();
+    }
+    cancel() { this._dismiss(); }
+    close() { this._dismiss(); }
+    userClose() { this._close(); }
+    _close() {
+      this.setAttribute('aria-hidden', 'true');
+      this.style.display = 'none';
+      if (!modalOpen()) {
+        backdrop.removeAttribute('opened');
+        backdrop.remove();
+        document.body.style.overflow = '';
+      }
+    }
+  }
+  customElements.define('tp-yt-paper-dialog', PaperDialog);
+
+  const byName = (name) => popup.querySelector(`tp-yt-paper-dialog[data-test="${name}"]`);
+
+  /** Create a closed dialog in the popup container. opts: {modal, pausesVideo, noop} */
+  fx.dialog = (name, markup, opts) => {
+    const o = opts || {};
+    const d = document.createElement('tp-yt-paper-dialog');
+    d.dataset.test = name;
+    d.dataset.probe = '';
+    d.setAttribute('aria-hidden', 'true');
+    d.style.display = 'none';
+    if (o.modal) d.setAttribute('with-backdrop', '');
+    if (o.pausesVideo) d.dataset.pausesVideo = '';
+    if (o.noop) d.dataset.noopDismiss = '';
+    d.append(html(markup));
+    popup.append(d);
+    return d;
+  };
+  fx.open = (name) => byName(name).open();
+  fx.userClose = (name) => byName(name).userClose();
+  fx.calls = (name) => Number(byName(name).dataset.dismissCalls || 0);
+  fx.isOpen = (name) => byName(name).getAttribute('aria-hidden') !== 'true';
+  fx.backdrop = () => !!document.querySelector('body > tp-yt-iron-overlay-backdrop');
+
+  fx.MEALBAR = '<ytd-mealbar-promo-renderer><span>Try YouTube Premium free</span>'
+    + '<div id="buttons"><a href="/premium?src=mealbar">Try it free</a><button>No thanks</button></div></ytd-mealbar-promo-renderer>';
+
+  // A Premium-only button: YouTube explains it with a mealbar shortly after the click.
+  document.querySelector('[data-test="stub-mealbar"]').addEventListener('click', (event) => {
+    const btn = event.currentTarget;
+    const name = btn.dataset.name;
+    setTimeout(() => {
+      fx.dialog(name, fx.MEALBAR);
+      fx.open(name);
+    }, Number(btn.dataset.delay));
+  });
+  // Same, but YouTube reuses an existing dialog element.
+  document.querySelector('[data-test="stub-reopen"]').addEventListener('click', (event) => {
+    const name = event.currentTarget.dataset.target;
+    setTimeout(() => fx.open(name), 200);
+  });
+  // The user's own modal: a Share dialog.
+  document.querySelector('[data-test="share-button"]').addEventListener('click', () => {
+    if (!byName('share')) fx.dialog('share', '<div>Share <input value="https://youtu.be/x"></div>', { modal: true });
+    fx.open('share');
+  });
+
+  // A playable main video without media files: a canvas stream.
+  fx.play = () => {
+    const v = document.querySelector('#movie_player video');
+    if (!v.srcObject) {
+      const c = document.createElement('canvas');
+      c.width = 16; c.height = 16;
+      const ctx = c.getContext('2d');
+      setInterval(() => { ctx.fillStyle = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'); ctx.fillRect(0, 0, 16, 16); }, 50);
+      v.srcObject = c.captureStream(20);
+    }
+    return v.play().then(() => 'playing', (e) => 'blocked: ' + e);
+  };
+
+  // Per-frame probe: for each dialog, frames it was open (as iron-overlay renders it: no
+  // aria-hidden and no inline display:none) and frames it was open but not displayed (= CSS hid it).
+  window.__probe = { hidden: {}, frames: {} };
+  (function loop() {
+    for (const d of popup.querySelectorAll('tp-yt-paper-dialog[data-probe]')) {
+      if (d.getAttribute('aria-hidden') === 'true' || d.style.display === 'none') continue;
+      const key = d.dataset.test;
+      window.__probe.frames[key] = (window.__probe.frames[key] || 0) + 1;
+      if (getComputedStyle(d).display === 'none') window.__probe.hidden[key] = (window.__probe.hidden[key] || 0) + 1;
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+</body>
+</html>

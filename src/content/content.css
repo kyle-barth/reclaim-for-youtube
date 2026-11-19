@@ -1,0 +1,195 @@
+/*
+ * Reclaim for YouTube – all hiding lives here, keyed off attributes that core.js puts on <html>:
+ *   html[data-rfy]                    master switch on
+ *   html[data-rfy-page="…"]           home | subscriptions | search | watch | shorts | channel |
+ *                                     channel-shorts | history | playlist | feed | other
+ *   html[data-rfy-<setting>]          boolean setting on
+ *   html[data-rfy-<setting>="value"]  enum setting value
+ * Hooks prefer tag names, URLs and ARIA over YouTube's class names.
+ * display:none (never visibility) so nothing invisible is left intercepting clicks.
+ */
+
+/* Elements a feature marked from JS. */
+html[data-rfy] [data-rfy-hide] {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Core 1 – "Experiencing interruptions?" toast (its action links to the ad-blocker help) */
+
+html[data-rfy][data-rfy-hide-interruptions] tp-yt-paper-toast:has(a[href*="blocker" i]),
+html[data-rfy][data-rfy-hide-interruptions] yt-notification-action-renderer:has(a[href*="blocker" i]) {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Core 2 – Shorts outside the Shorts tab (contain: everywhere but /shorts and a channel's
+   Shorts tab; remove: everywhere, and those pages redirect away). */
+
+html[data-rfy][data-rfy-shorts="contain"]:not([data-rfy-page="shorts"]):not([data-rfy-page="channel-shorts"]) :is(
+  ytd-reel-shelf-renderer,
+  ytd-rich-section-renderer:has(ytd-reel-shelf-renderer),
+  ytd-rich-shelf-renderer[is-shorts],
+  ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts], ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2),
+  grid-shelf-view-model:has(ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2),
+  ytd-rich-item-renderer:has(a[href^="/shorts/"], ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2),
+  ytd-video-renderer:has(a[href^="/shorts/"]),
+  ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+  ytd-compact-video-renderer:has(a[href^="/shorts/"]),
+  yt-lockup-view-model:has(a[href^="/shorts/"]),
+  ytm-shorts-lockup-view-model-v2,
+  ytm-shorts-lockup-view-model,
+  ytd-notification-renderer:has(a[href^="/shorts/"])
+),
+html[data-rfy][data-rfy-shorts="remove"] :is(
+  ytd-reel-shelf-renderer,
+  ytd-rich-section-renderer:has(ytd-reel-shelf-renderer),
+  ytd-rich-shelf-renderer[is-shorts],
+  ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts], ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2),
+  grid-shelf-view-model:has(ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2),
+  ytd-rich-item-renderer:has(a[href^="/shorts/"], ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2),
+  ytd-video-renderer:has(a[href^="/shorts/"]),
+  ytd-grid-video-renderer:has(a[href^="/shorts/"]),
+  ytd-compact-video-renderer:has(a[href^="/shorts/"]),
+  yt-lockup-view-model:has(a[href^="/shorts/"]),
+  ytm-shorts-lockup-view-model-v2,
+  ytm-shorts-lockup-view-model,
+  ytd-notification-renderer:has(a[href^="/shorts/"]),
+  /* the ways in: nav entries and channel tab */
+  ytd-guide-entry-renderer:has(> a#endpoint[title="Shorts"]),
+  ytd-guide-entry-renderer:has(a[href^="/shorts"]),
+  ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+  ytd-mini-guide-entry-renderer:has(a[href^="/shorts"]),
+  yt-tab-shape[tab-title="Shorts"]
+) {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Core 3 – Subscriptions: only the chronological grid. Every injected block (Most relevant,
+   Shorts, Playables, Recommended, Breaking news, posts) is a rich section. */
+
+html[data-rfy][data-rfy-subscriptions-chronological] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Clear player – nothing drawn over the video you chose (watch page only).
+   Never hidden: the autoplay countdown (.ytp-autonav-endscreen*), paid-promotion and
+   synthetic-content disclosures, captions, chapter titles, player controls. */
+
+/* YouTube's suggestions: post-video wall, pause-overlay "More videos", fullscreen grid. */
+/* Only the wall's content: in some player versions .html5-endscreen also holds the autoplay
+   countdown, which must stay visible. */
+html[data-rfy][data-rfy-hide-suggestions] ytd-watch-flexy #movie_player :is(
+  .ytp-endscreen-content,
+  .ytp-pause-overlay,
+  .ytp-pause-overlay-container,
+  .ytp-fullscreen-grid,
+  .ytp-fullscreen-grid-stills-container,
+  .ytp-fullscreen-grid-expand-button
+) {
+  display: none !important;
+}
+
+/* Creator overlays: end-screen tiles, info-card teaser and button, channel watermark. */
+html[data-rfy][data-rfy-hide-creator-overlays] ytd-watch-flexy #movie_player :is(
+  .ytp-ce-element,
+  .ytp-cards-teaser,
+  .ytp-cards-button,
+  .iv-branding,
+  .ytp-watermark
+) {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Search results only – denylist of shelves injected between results ("People also
+   watched", "For you", "Previously watched", "People also search for", …). Result tiles
+   themselves are never matched. "Latest from <channel>" right after a channel result stays. */
+
+html[data-rfy][data-rfy-search-results-only] ytd-search ytd-item-section-renderer > #contents > :is(
+  ytd-shelf-renderer,
+  ytd-horizontal-card-list-renderer,
+  ytd-search-refinement-card-renderer,
+  /* Shorts shelves are excluded here so the Shorts setting alone decides them. */
+  grid-shelf-view-model:not(:has(ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2)),
+  yt-shelf-view-model
+):not(ytd-channel-renderer + *) {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* No hover previews – the floating inline-preview player and animated thumbnails. */
+
+html[data-rfy][data-rfy-no-hover-previews] :is(ytd-video-preview, ytd-moving-thumbnail-renderer) {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Home & Up next feeds. A continuation with display:none never enters the viewport, so
+   YouTube never loads the next batch (verified live on Up next, 2026-11-19). Scoped by
+   page-subtype so Subscriptions, channel pages and search keep loading normally. */
+
+/* Home: ends after the first page (and drops the injected shelves, as on Subscriptions;
+   Shorts shelves are left to the Shorts setting). */
+html[data-rfy][data-rfy-home-page="finite"] ytd-browse[page-subtype="home"] ytd-rich-grid-renderer :is(
+  ytd-continuation-item-renderer,
+  ytd-rich-section-renderer:not(:has(ytd-rich-shelf-renderer[is-shorts], ytd-reel-shelf-renderer, ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2))
+) {
+  display: none !important;
+}
+
+/* Home: search box only (also the holding state while the Subscriptions redirect runs). */
+html[data-rfy]:is([data-rfy-home-page="search"], [data-rfy-home-page="subscriptions"]) ytd-browse[page-subtype="home"] :is(
+  ytd-rich-grid-renderer,
+  ytd-feed-filter-chip-bar-renderer
+) {
+  display: none !important;
+}
+
+/* Up next: ends after the first page / hidden. Only the related list: the playlist panel,
+   live chat and engagement panels in the same column are separate elements and stay. */
+html[data-rfy][data-rfy-up-next="finite"] ytd-watch-next-secondary-results-renderer ytd-continuation-item-renderer,
+html[data-rfy][data-rfy-up-next="hidden"] ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Quiet guide – the left menu loses YouTube's Explore and "More from YouTube" blocks and
+   any Premium entry. Keyed on hrefs (language-independent). Deliberately NOT keyed on topic
+   channel ids (people subscribe to those) or studio.youtube.com ("Your videos"). The Shorts
+   entry has no href, so nothing here can match it (core 2 owns it). */
+
+html[data-rfy][data-rfy-quiet-guide] ytd-guide-section-renderer:has(a#endpoint:is(
+  [href^="/feed/storefront"], [href="/gaming"], [href="/podcasts"], [href="/playables"],
+  [href^="/feed/courses_destination"], [href="/feed/news_destination"], [href="/feed/sports_destination"]
+)),
+html[data-rfy][data-rfy-quiet-guide] ytd-guide-section-renderer:has(a#endpoint:is(
+  [href^="https://music.youtube.com"], [href*="youtubekids.com"], [href^="https://tv.youtube.com"]
+)),
+html[data-rfy][data-rfy-quiet-guide] ytd-guide-entry-renderer:has(> a#endpoint[href^="/premium"]) {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Watched videos (90%+), on Home, Subscriptions and Up next only. Dimmed tiles come back to
+   full strength on hover or keyboard focus. Hide falls back to dim inside legacy row grids so
+   the grid doesn't get holes. */
+
+html[data-rfy]:is([data-rfy-watched-videos="dim"], [data-rfy-watched-videos="hide"])
+  :is(ytd-browse[page-subtype="home"], ytd-browse[page-subtype="subscriptions"], ytd-watch-next-secondary-results-renderer)
+  [data-rfy-watched] {
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+html[data-rfy]:is([data-rfy-watched-videos="dim"], [data-rfy-watched-videos="hide"])
+  :is(ytd-browse[page-subtype="home"], ytd-browse[page-subtype="subscriptions"], ytd-watch-next-secondary-results-renderer)
+  [data-rfy-watched]:is(:hover, :focus-within) {
+  opacity: 1;
+}
+html[data-rfy][data-rfy-watched-videos="hide"]
+  :is(ytd-browse[page-subtype="home"], ytd-browse[page-subtype="subscriptions"], ytd-watch-next-secondary-results-renderer)
+  [data-rfy-watched]:not(ytd-rich-grid-row *) {
+  display: none !important;
+}

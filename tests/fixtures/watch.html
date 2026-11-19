@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A video - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-watch-flexy>
+      <div id="primary">
+        <ytd-player data-test="player">
+          <div id="movie_player" class="html5-video-player">
+            <video class="html5-main-video" data-test="main-video"></video>
+            <!-- overlays the add-on hides -->
+            <div class="html5-endscreen ytp-player-content videowall-endscreen"><div class="ytp-endscreen-content" data-test="videowall">wall of videos</div></div>
+            <div class="ytp-pause-overlay" data-test="pause-overlay">More videos</div>
+            <div class="ytp-fullscreen-grid" data-test="fullscreen-grid">fullscreen grid</div>
+            <div class="ytp-ce-element ytp-ce-video" data-test="ce-element">end-screen tile</div>
+            <div class="ytp-cards-teaser" data-test="cards-teaser">card teaser</div>
+            <button class="ytp-cards-button" data-test="cards-button">i</button>
+            <div class="annotation iv-branding" data-test="watermark">watermark</div>
+            <!-- things that must stay -->
+            <div class="ytp-autonav-endscreen-countdown-overlay" data-test="countdown">Up next in 5</div>
+            <div class="ytp-paid-content-overlay" data-test="paid-promo">Includes paid promotion</div>
+            <div class="ytp-caption-window-container" data-test="captions">captions</div>
+            <div class="ytp-chrome-bottom" data-test="controls">
+              <button class="ytp-play-button">play</button>
+              <button class="ytp-button ytp-autonav-toggle" data-tooltip-target-id="ytp-autonav-toggle-button" data-test="autonav" data-clicks="0">
+                <div class="ytp-autonav-toggle-button-container"><div class="ytp-autonav-toggle-button" aria-checked="true"></div></div>
+              </button>
+            </div>
+          </div>
+        </ytd-player>
+        <ytd-watch-metadata>
+          <ytd-text-inline-expander data-test="description">
+            Check out my short: <a href="/shorts/dddddddddd1" data-test="desc-short-link">/shorts/dddddddddd1</a>
+          </ytd-text-inline-expander>
+        </ytd-watch-metadata>
+      </div>
+      <div id="secondary">
+        <ytd-watch-next-secondary-results-renderer>
+          <ytd-item-section-renderer>
+            <div id="contents">
+              <yt-lockup-view-model data-test="related-video"><a href="/watch?v=wwwwwwwwww1">Related 1</a></yt-lockup-view-model>
+              <ytd-reel-shelf-renderer data-test="watch-reel-shelf"><a href="/shorts/xxxxxxxxxx1">Shorts shelf</a></ytd-reel-shelf-renderer>
+              <yt-lockup-view-model data-test="related-short"><a href="/shorts/xxxxxxxxxx2">A short in related</a></yt-lockup-view-model>
+              <yt-lockup-view-model data-test="related-video"><a href="/watch?v=wwwwwwwwww2">Related 2</a></yt-lockup-view-model>
+            </div>
+          </ytd-item-section-renderer>
+        </ytd-watch-next-secondary-results-renderer>
+      </div>
+    </ytd-watch-flexy>
+  </ytd-page-manager>
+  <ytd-video-preview data-test="hover-preview"><video data-test="preview-video" muted></video></ytd-video-preview>
+  <ytd-moving-thumbnail-renderer data-test="moving-thumb">animated thumbnail</ytd-moving-thumbnail-renderer>
+</ytd-app>
+<script>
+  // Stand-in for the player's own handler: clicking the switch flips it.
+  const autonav = document.querySelector('[data-test="autonav"]');
+  autonav.addEventListener('click', () => {
+    const sw = autonav.querySelector('.ytp-autonav-toggle-button');
+    sw.setAttribute('aria-checked', sw.getAttribute('aria-checked') === 'true' ? 'false' : 'true');
+    autonav.dataset.clicks = String(Number(autonav.dataset.clicks) + 1);
+  });
+  // Playable sources without media files: a canvas stream.
+  window.__fx.playable = (selector) => {
+    const c = document.createElement('canvas');
+    c.width = 16; c.height = 16;
+    const ctx = c.getContext('2d');
+    setInterval(() => { ctx.fillStyle = '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'); ctx.fillRect(0, 0, 16, 16); }, 50);
+    const v = document.querySelector(selector);
+    v.dataset.playEvents = '0';
+    v.addEventListener('play', () => { v.dataset.playEvents = String(Number(v.dataset.playEvents) + 1); });
+    v.srcObject = c.captureStream(20);
+    // An add-on pausing the video during play() rejects the promise with AbortError.
+    return v.play().then(() => 'playing', (e) => (e && e.name === 'AbortError' ? 'aborted' : 'blocked: ' + e));
+  };
+  // Countdown with a cancel button, like the autonav end screen.
+  window.__fx.countdown = () => {
+    const player = document.querySelector('#movie_player');
+    const b = document.createElement('button');
+    b.className = 'ytp-autonav-endscreen-upnext-cancel-button';
+    b.dataset.test = 'countdown-cancel';
+    b.textContent = 'Cancel';
+    b.addEventListener('click', () => { b.dataset.cancelled = 'yes'; });
+    player.append(b);
+    player.querySelector('video').dispatchEvent(new Event('ended'));
+  };
+</script>
+</body>
+</html>

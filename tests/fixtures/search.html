@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>guitar lesson - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-search>
+      <yt-chip-cloud-renderer data-test="chips">
+        <yt-chip-cloud-chip-renderer data-test="chip-all"><chip-shape>All</chip-shape></yt-chip-cloud-chip-renderer>
+        <yt-chip-cloud-chip-renderer data-test="chip-shorts"><chip-shape> Shorts </chip-shape></yt-chip-cloud-chip-renderer>
+        <yt-chip-cloud-chip-renderer data-test="chip-videos"><chip-shape>Videos</chip-shape></yt-chip-cloud-chip-renderer>
+      </yt-chip-cloud-renderer>
+      <ytd-two-column-search-results-renderer>
+        <ytd-section-list-renderer>
+          <ytd-item-section-renderer>
+            <div id="contents">
+              <ytd-ad-slot-renderer data-test="search-ad">Sponsored thing (left alone)</ytd-ad-slot-renderer>
+              <yt-lockup-view-model data-test="search-video"><a href="/watch?v=vvvvvvvvvv1&amp;pp=ygUMZ3VpdGFy">Guitar lesson 1</a></yt-lockup-view-model>
+              <grid-shelf-view-model data-test="search-shorts-shelf">
+                <yt-section-header-view-model>Shorts</yt-section-header-view-model>
+                <div><div><div>
+                  <ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href="/shorts/uuuuuuuuuu1">A short</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2>
+                </div></div></div>
+              </grid-shelf-view-model>
+              <yt-lockup-view-model data-test="search-video"><a href="/watch?v=vvvvvvvvvv2">Guitar lesson 2</a></yt-lockup-view-model>
+              <ytd-reel-shelf-renderer data-test="search-reel-shelf"><a href="/shorts/uuuuuuuuuu2">Legacy reel shelf</a></ytd-reel-shelf-renderer>
+              <ytd-video-renderer data-test="search-short-result"><a href="/shorts/uuuuuuuuuu3">A short as a plain result</a></ytd-video-renderer>
+              <yt-lockup-view-model data-test="search-short-lockup"><a href="/shorts/uuuuuuuuuu4">A short as a lockup</a></yt-lockup-view-model>
+              <yt-lockup-view-model data-test="search-video"><a href="/watch?v=vvvvvvvvvv3">Guitar lesson 3</a></yt-lockup-view-model>
+              <!-- injected, non-result shelves (Search results only) -->
+              <ytd-shelf-renderer data-test="search-people-also">People also watched</ytd-shelf-renderer>
+              <ytd-horizontal-card-list-renderer data-test="search-also-search">People also search for</ytd-horizontal-card-list-renderer>
+              <grid-shelf-view-model data-test="search-for-you">
+                <yt-section-header-view-model>For you</yt-section-header-view-model>
+                <yt-lockup-view-model><a href="/watch?v=foryou00001">Recommended, not a result</a></yt-lockup-view-model>
+              </grid-shelf-view-model>
+              <ytd-channel-renderer data-test="search-channel"><a href="/@guitarguy">Guitar Guy (channel result)</a></ytd-channel-renderer>
+              <ytd-shelf-renderer data-test="search-latest-from">Latest from Guitar Guy</ytd-shelf-renderer>
+              <yt-lockup-view-model data-test="search-video"><a href="/watch?v=vvvvvvvvvv4">Guitar lesson 4</a></yt-lockup-view-model>
+              <!-- the other A/B layout: ytd-video-renderer with a nested chapters carousel (must stay) -->
+              <ytd-video-renderer data-test="search-video-legacy"><div id="dismissible"><a href="/watch?v=vvvvvvvvvv5">Guitar lesson 5</a>
+                <div id="expandable-metadata"><ytd-expandable-metadata-renderer><div id="content">
+                  <ytd-horizontal-card-list-renderer data-test="search-chapters">Intro · Chords · Strumming</ytd-horizontal-card-list-renderer>
+                </div></ytd-expandable-metadata-renderer></div></div>
+              </ytd-video-renderer>
+            </div>
+          </ytd-item-section-renderer>
+        </ytd-section-list-renderer>
+      </ytd-two-column-search-results-renderer>
+    </ytd-search>
+  </ytd-page-manager>
+</ytd-app>
+</body>
+</html>

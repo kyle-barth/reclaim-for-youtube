@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo" data-test="logo">YouTube</a></ytd-masthead>
+  <div id="page">
+    <tp-yt-app-drawer>
+      <ytd-guide-renderer>
+        <ytd-guide-section-renderer data-test="guide-main">
+          <ytd-guide-entry-renderer data-test="guide-home"><a id="endpoint" href="/" title="Home">Home</a></ytd-guide-entry-renderer>
+          <ytd-guide-entry-renderer data-test="guide-shorts"><a id="endpoint" title="Shorts" role="link">Shorts</a></ytd-guide-entry-renderer>
+          <ytd-guide-entry-renderer data-test="guide-subs"><a id="endpoint" href="/feed/subscriptions" title="Subscriptions">Subscriptions</a></ytd-guide-entry-renderer>
+        </ytd-guide-section-renderer>
+      </ytd-guide-renderer>
+      <ytd-mini-guide-renderer>
+        <ytd-mini-guide-entry-renderer aria-label="Home" data-test="mini-home"><a href="/">Home</a></ytd-mini-guide-entry-renderer>
+        <ytd-mini-guide-entry-renderer aria-label="Shorts" data-test="mini-shorts"><a>Shorts</a></ytd-mini-guide-entry-renderer>
+      </ytd-mini-guide-renderer>
+    </tp-yt-app-drawer>
+    <ytd-page-manager>
+      <ytd-browse page-subtype="home">
+        <ytd-rich-grid-renderer>
+          <div id="contents">
+            <ytd-rich-item-renderer data-test="home-video">
+              <yt-lockup-view-model><a href="/watch?v=aaaaaaaaaa1">A normal video</a></yt-lockup-view-model>
+            </ytd-rich-item-renderer>
+            <ytd-rich-section-renderer data-test="home-shorts-shelf">
+              <div id="content">
+                <ytd-rich-shelf-renderer is-shorts="">
+                  <span id="title">Shorts</span>
+                  <ytd-rich-item-renderer>
+                    <ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href="/shorts/bbbbbbbbbb1">A short</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2>
+                  </ytd-rich-item-renderer>
+                </ytd-rich-shelf-renderer>
+              </div>
+            </ytd-rich-section-renderer>
+            <ytd-rich-item-renderer data-test="home-short-item">
+              <ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href="/shorts/bbbbbbbbbb2">A short in the grid</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2>
+            </ytd-rich-item-renderer>
+            <ytd-rich-item-renderer data-test="home-video-2">
+              <yt-lockup-view-model><a href="/watch?v=aaaaaaaaaa2">Another video</a></yt-lockup-view-model>
+            </ytd-rich-item-renderer>
+          </div>
+        </ytd-rich-grid-renderer>
+      </ytd-browse>
+    </ytd-page-manager>
+  </div>
+  <div id="under-toast" data-test="under-toast">Something underneath the toast</div>
+  <ytd-popup-container>
+    <tp-yt-paper-toast id="toast" style="display:none"></tp-yt-paper-toast>
+  </ytd-popup-container>
+</ytd-app>
+</body>
+</html>

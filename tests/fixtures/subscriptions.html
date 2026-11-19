@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Subscriptions - YouTube (fixture)</title>
+<link rel="stylesheet" href="/static/fixture.css">
+<script src="/static/fixture.js"></script>
+</head>
+<body>
+<ytd-app>
+  <ytd-masthead><a href="/" id="logo">YouTube</a></ytd-masthead>
+  <ytd-page-manager>
+    <ytd-browse page-subtype="subscriptions">
+      <ytd-rich-grid-renderer>
+        <div id="contents">
+          <ytd-rich-section-renderer data-test="subs-most-relevant">
+            <div id="content"><ytd-rich-shelf-renderer>
+              <span id="title">Most relevant</span>
+              <ytd-rich-item-renderer><yt-lockup-view-model><a href="/watch?v=rrrrrrrrrr1">Old but "relevant" video</a></yt-lockup-view-model></ytd-rich-item-renderer>
+            </ytd-rich-shelf-renderer></div>
+          </ytd-rich-section-renderer>
+          <ytd-rich-item-renderer data-test="subs-video" data-order="1"><yt-lockup-view-model><a href="/watch?v=ssssssssss1">Newest video</a></yt-lockup-view-model></ytd-rich-item-renderer>
+          <ytd-rich-item-renderer data-test="subs-video" data-order="2"><yt-lockup-view-model><a href="/watch?v=ssssssssss2">Second newest</a></yt-lockup-view-model></ytd-rich-item-renderer>
+          <ytd-rich-section-renderer data-test="subs-shorts-shelf">
+            <div id="content"><ytd-rich-shelf-renderer is-shorts="">
+              <span id="title">Shorts</span>
+              <ytd-rich-item-renderer><ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href="/shorts/tttttttttt1">Short</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2></ytd-rich-item-renderer>
+            </ytd-rich-shelf-renderer></div>
+          </ytd-rich-section-renderer>
+          <ytd-rich-item-renderer data-test="subs-video" data-order="3"><yt-lockup-view-model><a href="/watch?v=ssssssssss3">Third newest</a></yt-lockup-view-model></ytd-rich-item-renderer>
+          <ytd-rich-section-renderer data-test="subs-playables">
+            <div id="content"><ytd-rich-shelf-renderer>
+              <span id="title">Playables</span>
+              <ytd-rich-item-renderer><ytd-mini-game-card-view-model><a href="/playables/ggggg">A game</a></ytd-mini-game-card-view-model></ytd-rich-item-renderer>
+            </ytd-rich-shelf-renderer></div>
+          </ytd-rich-section-renderer>
+          <ytd-rich-item-renderer data-test="subs-post"><ytd-post-renderer><a href="/post/Ugkxpppppp">A community post</a></ytd-post-renderer></ytd-rich-item-renderer>
+          <ytd-rich-item-renderer data-test="subs-live" data-order="4"><yt-lockup-view-model><a href="/watch?v=ssssssssss4">A live stream</a></yt-lockup-view-model></ytd-rich-item-renderer>
+          <ytd-rich-section-renderer data-test="subs-recommended">
+            <div id="content"><ytd-rich-shelf-renderer>
+              <span id="title">Recommended</span>
+              <ytd-rich-item-renderer><yt-lockup-view-model><a href="/watch?v=rrrrrrrrrr2">Something you didn't subscribe to</a></yt-lockup-view-model></ytd-rich-item-renderer>
+            </ytd-rich-shelf-renderer></div>
+          </ytd-rich-section-renderer>
+          <ytd-rich-item-renderer data-test="subs-short-item"><ytm-shorts-lockup-view-model-v2><ytm-shorts-lockup-view-model><a href="/shorts/tttttttttt2">Short tile in the grid</a></ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2></ytd-rich-item-renderer>
+        </div>
+      </ytd-rich-grid-renderer>
+    </ytd-browse>
+  </ytd-page-manager>
+</ytd-app>
+</body>
+</html>
