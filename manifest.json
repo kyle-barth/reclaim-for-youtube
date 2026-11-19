@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Reclaim for YouTube",
   "short_name": "Reclaim",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Take YouTube back: Shorts only in the Shorts tab, a chronological subscriptions feed, and no ad-block nag popups.",
   "browser_specific_settings": {
     "gecko": {

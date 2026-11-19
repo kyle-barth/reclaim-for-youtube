@@ -53,6 +53,7 @@ def test_canary_core_hooks_exist(yt):
     assert yt.js("return document.querySelectorAll(arguments[0]).length", SHORTS_SHELF) > 0, "search Shorts shelf hook"
     assert yt.js("return document.querySelectorAll(':is(yt-lockup-view-model, ytd-video-renderer) a[href^=\"/watch\"]').length") > 3, "result lockups"
     assert yt.js("return document.querySelectorAll(arguments[0]).length", GUIDE_SHORTS) == 1, "guide Shorts entry"
+    assert yt.js("return document.querySelectorAll('ytd-app > yt-ephemeral-actions').length") == 1,         "interruptions popup host (yt-ephemeral-actions)"
     open_live(yt, CHANNEL)
     assert yt.js("return document.querySelectorAll(arguments[0]).length", SHORTS_TAB) == 1, "channel Shorts tab"
 

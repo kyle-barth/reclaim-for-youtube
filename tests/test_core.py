@@ -84,6 +84,37 @@ def test_reused_toast_shows_other_messages(browser):
     browser.wait_for(lambda: browser.all_visible("tp-yt-paper-toast#toast"), message="other toast visible")
 
 
+def test_interruptions_ephemeral_host_hidden_then_reused(browser):
+    """Current form (captured live 2026-11): a reused yt-ephemeral-actions host with only text."""
+    browser.open("/")
+    eph = '[data-test="ephemeral"]'
+    browser.js("document.querySelector(arguments[0]).textContent = 'Experiencing interruptions?'", eph)
+    browser.wait_for(lambda: browser.visible(eph) == [False], message="ephemeral popup hidden")
+    # YouTube reuses the host for other messages: those must show.
+    browser.js("document.querySelector(arguments[0]).textContent = 'Saved to Watch later'", eph)
+    browser.wait_for(lambda: browser.visible(eph) == [True], message="other message visible")
+
+
+def test_interruptions_ephemeral_text_changed_in_place(browser):
+    """The text node's data changing in place (characterData) is caught too."""
+    browser.open("/")
+    eph = '[data-test="ephemeral"]'
+    browser.js("document.querySelector(arguments[0]).textContent = 'Saved to Watch later'", eph)
+    time.sleep(0.4)
+    assert browser.visible(eph) == [True]
+    browser.js("document.querySelector(arguments[0]).firstChild.data = 'Experiencing interruptions?'", eph)
+    browser.wait_for(lambda: browser.visible(eph) == [False], message="hidden after in-place text change")
+
+
+def test_interruptions_ephemeral_toggle_off(browser):
+    browser.set_settings(hideInterruptions=False)
+    browser.open("/")
+    eph = '[data-test="ephemeral"]'
+    browser.js("document.querySelector(arguments[0]).textContent = 'Experiencing interruptions?'", eph)
+    time.sleep(0.6)
+    assert browser.visible(eph) == [True]
+
+
 def test_interruptions_toggle_off(browser):
     browser.set_settings(hideInterruptions=False)
     browser.open("/")

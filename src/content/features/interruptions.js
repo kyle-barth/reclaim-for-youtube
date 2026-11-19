@@ -1,19 +1,39 @@
 /*
- * Core 1: hide the "Experiencing interruptions? Find out why" popup shown to ad-block users.
+ * Core 1: hide the "Experiencing interruptions?" popup shown to ad-block users.
  *
- * Primary hook (CSS, content.css): a toast whose action link points at YouTube's
- * ad-blocker help article (href contains "blocker"). The toast element is reused for
- * other messages, so CSS :has() un-hides it automatically once its content changes.
+ * YouTube has shipped it in two forms:
+ *  - a reused tp-yt-paper-toast whose action links to the ad-blocker help article. CSS in
+ *    content.css hides it by that link; :has() un-hides it once the toast shows something else.
+ *  - (current, seen 2026-11) the reused yt-ephemeral-actions host under ytd-app, holding only
+ *    the text "Experiencing interruptions?" and no link. Only the text identifies it, so JS
+ *    marks it while that text is showing and unmarks it when the host shows anything else.
  *
- * Fallback (here): if the link hook ever disappears, match the toast by its English text.
- * display:none (not visibility) is used so no invisible box is left swallowing clicks.
+ * Reused hosts change their text in place, which the shared observer (childList only) can
+ * miss, so each host gets its own tiny observer that re-checks synchronously, before paint.
+ * display:none (not visibility) so no invisible box is left swallowing clicks.
  */
 (function () {
   'use strict';
   const R = globalThis.Reclaim;
   const TOKEN = 'interruptions';
-  const POPUPS = 'tp-yt-paper-toast, yt-notification-action-renderer, ytd-popup-container tp-yt-paper-dialog';
+  const HOSTS = 'yt-ephemeral-actions, tp-yt-paper-toast, yt-notification-action-renderer, ytd-popup-container tp-yt-paper-dialog';
   const TEXT = /experiencing interruptions/i;
+  const watched = new WeakSet();
+
+  function check(el) {
+    const matches = R.on('hideInterruptions') && TEXT.test(el.textContent || '');
+    const marked = (el.getAttribute('data-rfy-hide') || '').split(' ').includes(TOKEN);
+    if (matches && !marked) R.hide(el, TOKEN);
+    else if (!matches && marked) R.unhide(el, TOKEN); // the reused host now shows something else
+  }
+
+  function watch(el) {
+    if (watched.has(el)) return;
+    watched.add(el);
+    new MutationObserver(() => {
+      try { check(el); } catch (_) { /* leave YouTube as-is */ }
+    }).observe(el, { childList: true, characterData: true, subtree: true });
+  }
 
   R.register({
     id: TOKEN,
@@ -23,12 +43,9 @@
     },
 
     scan() {
-      if (!R.on('hideInterruptions')) return;
-      for (const el of document.querySelectorAll(POPUPS)) {
-        const matches = TEXT.test(el.textContent || '');
-        const marked = (el.getAttribute('data-rfy-hide') || '').includes(TOKEN);
-        if (matches && !marked) R.hide(el, TOKEN);
-        else if (!matches && marked) R.unhide(el, TOKEN); // reused toast now shows something else
+      for (const el of document.querySelectorAll(HOSTS)) {
+        watch(el);
+        check(el);
       }
     },
   });

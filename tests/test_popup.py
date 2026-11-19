@@ -8,7 +8,7 @@ from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-from conftest import EXT_ORIGIN, open_privileged_tab
+from conftest import EXT_ORIGIN, MANIFEST, open_privileged_tab
 
 
 @pytest.fixture()
@@ -195,4 +195,4 @@ def test_reset_leaves_master_switch_alone(popup):
 
 def test_version_shown(popup):
     b, _ = popup
-    assert b.js("return document.querySelector('[data-version]').textContent") == "1.0.0"
+    assert b.js("return document.querySelector('[data-version]').textContent") == MANIFEST["version"]

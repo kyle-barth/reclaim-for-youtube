@@ -29,3 +29,8 @@
 - Toast: `tp-yt-paper-toast#toast` containing `yt-button-renderer#action-button a[href*="blocker"]`. Bottom-left. Reused toast element.
 - `visibility:hidden` leaves an invisible box that still blocks clicks → use `display:none`.
 - Related page flag: `yt.config_.EXPERIENCE_INTERRUPTIONS_MODE` (not used; out of scope).
+
+## Update 2026-11-19 (captured from a real affected account)
+- The "Experiencing interruptions?" popup now renders in the reused host `ytd-app > yt-ephemeral-actions.ytEphemeralActionsHost`
+  (`aria-live="polite" aria-atomic="true"`) containing only the text "Experiencing interruptions?", no link. Hidden by text
+  match while that message is showing; the host is reused for other notices, which stay visible.
