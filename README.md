@@ -100,6 +100,8 @@ Set `HEADED=1` to watch the browser, or `FIREFOX_BIN` if Firefox isn't in a stan
   signed-in canary.
 - Desktop `www.youtube.com` only. No `m.youtube.com`, YouTube Music or embedded players.
 
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each version.
+
 ## Design docs
 
 - [`docs/design/`](docs/design/README.md): the popup's information architecture, states, copy deck and
